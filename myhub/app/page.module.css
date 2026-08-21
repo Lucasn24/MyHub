@@ -1,0 +1,272 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 100%;
+  border-radius: 1.75rem;
+  background-color: #f7f7f7;
+  padding: 2rem 2.25rem;
+}
+
+/* top bar */
+
+.topBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.statusBadge {
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #333;
+}
+
+.heading {
+  margin: 0.75rem 0 0;
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #111;
+}
+
+.syncButton {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+}
+
+.syncButton:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* section header, shared by both columns */
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #111;
+}
+
+.runningCount {
+  font-size: 0.8rem;
+  color: #8a8a86;
+}
+
+.viewAllButton {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+}
+
+.viewAllButton:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* content grid */
+
+.content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* active automations */
+
+.automationsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.automationCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+  padding: 1.25rem;
+}
+
+.cardLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #8a8a86;
+}
+
+.cardValue {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.cardSub {
+  font-size: 0.8rem;
+  color: #6f6f6b;
+}
+
+/* monthly expenses */
+
+.expensesPanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.expensesList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+}
+
+.expenseItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.expenseItem:last-child {
+  border-bottom: none;
+}
+
+.expenseName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.expenseSub {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: #8a8a86;
+}
+
+.expenseAmount {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.totalBurn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-radius: 1.25rem;
+  background-color: #eeea3f;
+  padding: 1.25rem;
+}
+
+.totalBurnLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #6b6a1e;
+}
+
+.totalBurnValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.totalBurnSub {
+  font-size: 0.8rem;
+  color: #6b6a1e;
+}
+
+/* google integration */
+
+.googleGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.googlePanel {
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+  overflow: hidden;
+}
+
+.googlePanelTitle {
+  padding: 1rem 1.25rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #8a8a86;
+}
+
+.listItem {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listEmpty {
+  padding: 0.85rem 1.25rem;
+  font-size: 0.8rem;
+  color: #8a8a86;
+}
+
+.listPrimary {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.listSecondary {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: #8a8a86;
+}
+
+.connectPrompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+}
+
+.connectText {
+  font-size: 0.85rem;
+  color: #6f6f6b;
+}
