@@ -10,10 +10,41 @@ def upsert_email_base(gmail_message_id: str, email: EmailInput) -> None:
             "sender": email.sender,
             "snippet": email.snippet,
             "body": email.body,
+            "links": email.links,
+            "attachments": [a.model_dump() for a in email.attachments],
             "received_at": email.received_at.isoformat() if email.received_at else None,
         },
         on_conflict="gmail_message_id",
     ).execute()
+
+
+def list_known_message_ids() -> set[str]:
+    result = get_supabase_client().table("emails").select("gmail_message_id").execute()
+    return {row["gmail_message_id"] for row in result.data}
+
+
+def list_inbox_emails(limit: int = 100) -> list[dict]:
+    result = (
+        get_supabase_client()
+        .table("emails")
+        .select("*, tasks(*), events(*)")
+        .order("received_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return result.data
+
+
+def delete_email(gmail_message_id: str) -> None:
+    get_supabase_client().table("emails").delete().eq("gmail_message_id", gmail_message_id).execute()
+
+
+def confirm_task(task_id: str, updates: dict) -> None:
+    get_supabase_client().table("tasks").update({**updates, "confirmed": True}).eq("id", task_id).execute()
+
+
+def confirm_event(event_id: str, updates: dict) -> None:
+    get_supabase_client().table("events").update({**updates, "confirmed": True}).eq("id", event_id).execute()
 
 
 def set_email_category(gmail_message_id: str, category: str) -> None:

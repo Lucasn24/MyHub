@@ -1,3 +1,646 @@
-.page {
-  padding: 2rem;
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  border-radius: 1.75rem;
+  background-color: #f7f7f7;
+  padding: 2rem 2.25rem;
+}
+
+/* top bar */
+
+.topBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.statusBadge {
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #333;
+}
+
+.heading {
+  margin: 0.75rem 0 0;
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #111;
+}
+
+.syncButton {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.syncButton:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* category filter row */
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.filterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #444;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.filterPill:hover {
+  background-color: #f2f1ec;
+}
+
+.filterPillActive,
+.filterPillActive:hover {
+  background-color: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+.filterCount {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.55;
+}
+
+/* section header, shared by both columns */
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #111;
+}
+
+.runningCount {
+  font-size: 0.8rem;
+  color: #8a8a86;
+}
+
+.viewAllButton {
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.viewAllButton:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.viewAllButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.viewAllButton:disabled:hover {
+  background-color: #ffffff;
+  color: #111;
+}
+
+/* content grid */
+
+.content {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* email list */
+
+.emailList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+  overflow: hidden;
+}
+
+.emailItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.emailItem:hover {
+  background-color: #ebeae3;
+}
+
+.emailItem:last-child {
+  border-bottom: none;
+}
+
+.emailContainer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.emailMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.emailTopLine {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.emailSubject {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.emailReceived {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: #8a8a86;
+}
+
+.emailSender {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6f6f6b;
+}
+
+/* Gmail-style select checkbox, top-left of each row */
+
+.selectCol {
+  display: flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+  padding-top: 0.2rem;
+}
+
+.selectCol input {
+  width: 16px;
+  height: 16px;
+  accent-color: #111;
+  cursor: pointer;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.selectedCount {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.confirmButton {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+}
+
+.confirmButton:hover:not(:disabled) {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.confirmButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.emailSnippet {
+  font-size: 0.8rem;
+  color: #8a8a86;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emailBody {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #52524e;
+  white-space: pre-line;
+  max-width: 60ch;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.attachmentIndicator {
+  flex-shrink: 0;
+  color: #8a8a86;
+}
+
+.extrasGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.extrasLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a8a86;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.linkChip,
+.attachmentChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.linkChip {
+  color: #111;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.linkChip:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.attachmentChip {
+  color: #444;
+}
+
+.chipText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+
+.chipMeta {
+  flex-shrink: 0;
+  color: #8a8a86;
+  font-size: 0.68rem;
+}
+
+.moreChips {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #8a8a86;
+}
+
+.actionButton {
+  align-self: flex-start;
+  margin-top: 0.3rem;
+  border: 1px solid rgba(107, 106, 30, 0.3);
+  border-radius: 9999px;
+  background-color: rgba(238, 234, 63, 0.18);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b6a1e;
+  cursor: pointer;
+}
+
+.actionButton:hover {
+  background-color: rgba(238, 234, 63, 0.35);
+}
+
+.confirmedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  margin-top: 0.3rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 9999px;
+  background-color: #f2f1ec;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6f6f6b;
+}
+
+.listEmpty {
+  padding: 0.85rem 1.25rem;
+  font-size: 0.8rem;
+  color: #8a8a86;
+}
+
+/* category badge + per-row external actions */
+
+.rowActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.categoryBadge {
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #444;
+  white-space: nowrap;
+}
+
+.gmailLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #8a8a86;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.gmailLink:hover {
+  color: #111;
+  text-decoration: underline;
+}
+
+.categoryBadgeFilled {
+  background-color: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+/* side panel */
+
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.attentionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.automationCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+  padding: 1.1rem;
+}
+
+.cardLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #8a8a86;
+}
+
+.cardValue {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.cardSub {
+  font-size: 0.75rem;
+  color: #6f6f6b;
+}
+
+.actionList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+}
+
+.actionItem {
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.actionItem:last-child {
+  border-bottom: none;
+}
+
+.expenseName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.expenseSub {
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: #6b6a1e;
+}
+
+.cleanupPrompt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+}
+
+.connectText {
+  font-size: 0.82rem;
+  color: #6f6f6b;
+}
+
+/* action/event edit modal */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  padding: 1.5rem;
+}
+
+.modalCard {
+  width: min(420px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 1.5rem;
+  background-color: #ffffff;
+  padding: 1.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.modalSubtitle {
+  margin: 0.35rem 0 1.25rem;
+  font-size: 0.8rem;
+  color: #8a8a86;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  min-width: 0;
+}
+
+.formField label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a8a86;
+}
+
+.formInput {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+  color: #111;
+  background-color: #ffffff;
+  font-family: inherit;
+}
+
+.formInput:focus {
+  outline: 2px solid #111;
+  outline-offset: 1px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.modalOkButton {
+  border: 1px solid #000000;
+  border-radius: 9999px;
+  background-color: #000000;
+  padding: 0.5rem 1.15rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.modalOkButton:hover {
+  opacity: 0.85;
+}
+
+.modalOkButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modalError {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.8rem;
+  color: #b3261e;
 }

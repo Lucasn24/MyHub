@@ -19,11 +19,20 @@ class EmailCategory(str, Enum):
     OTHER = "other"
 
 
+class AttachmentInfo(BaseModel):
+    filename: str
+    size: int
+
+
 class EmailInput(BaseModel):
     subject: str
     sender: str = Field(description="Raw From header, e.g. 'Jane Doe <jane@example.com>'")
     snippet: str = Field(description="Short preview text from the mail provider")
     body: str | None = Field(default=None, description="Full email body, when available")
+    links: list[str] = Field(default_factory=list, description="URLs found in the email body")
+    attachments: list[AttachmentInfo] = Field(
+        default_factory=list, description="Attachment filename/size metadata (no file bytes)"
+    )
     received_at: datetime | None = Field(
         default=None, description="When the email was sent/received, per the mail provider"
     )

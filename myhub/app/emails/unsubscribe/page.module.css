@@ -1,0 +1,131 @@
+.senderRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.senderRow:last-child {
+  border-bottom: none;
+}
+
+.senderInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.senderName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.senderEmail {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: #8a8a86;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.countBadge {
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 9999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6f6f6b;
+  background-color: #ffffff;
+}
+
+.actionCol {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.unsubscribeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid #000000;
+  border-radius: 9999px;
+  background-color: #000000;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.unsubscribeButton:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.unsubscribeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.openLinkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.openLinkButton:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.doneBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 9999px;
+  background-color: #f2f1ec;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6f6f6b;
+  white-space: nowrap;
+}
+
+.noMethod {
+  font-size: 0.72rem;
+  color: #8a8a86;
+}
+
+.errorText {
+  font-size: 0.68rem;
+  color: #b3261e;
+  max-width: 220px;
+  text-align: right;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

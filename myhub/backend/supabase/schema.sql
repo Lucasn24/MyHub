@@ -9,6 +9,10 @@ create table if not exists emails (
     sender text not null,
     snippet text not null,
     body text,
+    -- Links found in the email body, and lightweight attachment metadata
+    -- (filename/mimeType/size) -- no attachment bytes are stored here.
+    links text[] not null default '{}',
+    attachments jsonb not null default '[]',
     received_at timestamptz,
     -- Nullable: /extract-tasks and /extract-events can create a base row before
     -- /categorize ever runs for that email, since the three endpoints are independent.
@@ -20,6 +24,19 @@ create table if not exists emails (
     categorized_at timestamptz not null default now()
 );
 
+-- Defensive: covers a live table that predates any of these columns, not just links/attachments.
+alter table emails add column if not exists gmail_thread_id text;
+alter table emails add column if not exists snippet text not null default '';
+alter table emails add column if not exists body text;
+alter table emails add column if not exists links text[] not null default '{}';
+alter table emails add column if not exists attachments jsonb not null default '[]';
+alter table emails add column if not exists received_at timestamptz;
+alter table emails add column if not exists category text;
+alter table emails add column if not exists categorized_at timestamptz not null default now();
+-- Some live tables ended up with category NOT NULL, which breaks /process's
+-- insert-then-categorize flow (the base row is written before category is known).
+alter table emails alter column category drop not null;
+
 create index if not exists emails_category_idx on emails (category);
 
 create table if not exists tasks (
@@ -29,8 +46,12 @@ create table if not exists tasks (
     due_date date,
     due_date_text text,
     addressed_to_user boolean not null default true,
+    -- Stays false until the user reviews/edits and confirms it in the Emails UI popup.
+    confirmed boolean not null default false,
     created_at timestamptz not null default now()
 );
+
+alter table tasks add column if not exists confirmed boolean not null default false;
 
 create index if not exists tasks_gmail_message_id_idx on tasks (gmail_message_id);
 
@@ -38,12 +59,17 @@ create table if not exists events (
     id uuid primary key default gen_random_uuid(),
     gmail_message_id text not null references emails(gmail_message_id) on delete cascade,
     title text not null,
+    -- The meeting's own real-world status, as extracted by the LLM -- distinct
+    -- from `confirmed` below, which tracks whether the *user* has reviewed it.
     status text not null check (status in ('proposed', 'confirmed', 'rescheduled', 'cancelled')),
     location text,
     attendees text[] not null default '{}',
     candidate_times jsonb not null default '[]',
+    confirmed boolean not null default false,
     created_at timestamptz not null default now()
 );
+
+alter table events add column if not exists confirmed boolean not null default false;
 
 create index if not exists events_gmail_message_id_idx on events (gmail_message_id);
 
