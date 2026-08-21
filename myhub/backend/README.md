@@ -1,14 +1,19 @@
 # backend
 
-LangGraph agent served behind a FastAPI endpoint, for the `myhub` Next.js frontend (one directory up) to call.
+Email pipeline agents served behind a FastAPI endpoint, for the `myhub` Next.js frontend (one directory up) to call.
 
 ## Structure
 
 ```
 app/
-  config.py  # getLLM() — Gemini Flash client
-  graph.py   # LangGraph graph (nodes, edges, checkpointer)
-  main.py    # FastAPI app exposing the graph over HTTP
+  api/
+    email.py   # POST /email/categorize
+  email_pipeline/
+    schemas.py   # EmailInput, EmailCategory, CategoryResult
+    prompts.py   # system prompt + prompt builder
+    agents.py    # categorize_email()
+  config.py    # getLLM() — Gemini Flash client
+  main.py      # FastAPI app assembly, includes the routers above
 ```
 
 ## Setup
@@ -29,14 +34,6 @@ Env vars live in one shared file at the `myhub` root: copy `myhub/.env_sample` t
 ```
 
 - `GET /health` — liveness check
-- `POST /chat` — body `{"message": "hi", "thread_id": "optional-existing-thread"}`, returns `{"reply": "...", "thread_id": "..."}`. Omit `thread_id` on the first call and reuse the one returned to keep conversation history (kept in-memory per server process; swap `MemorySaver` in `app/graph.py` for a persistent checkpointer before deploying).
+- `POST /email/categorize` — body `{"subject": "...", "sender": "...", "snippet": "...", "body": "optional full text", "id": "optional passthrough"}`, returns `{"category": "...", "confidence": 0-1, "reason": "...", "id": "..."}`. Category is one of `urgent`/`action_required`/`newsletter`/`promotional`/`receipt`/`personal`/`social`/`spam`/`other` (see `app/email_pipeline/schemas.py`).
 
 CORS is currently open to `http://localhost:3000` (the Next.js dev server) in `app/main.py` — add your deployed frontend origin there when you deploy.
-
-## Run the graph directly (no API)
-
-```
-.venv\Scripts\python.exe -m app.graph
-```
-
-Build on `builder` in `app/graph.py` to add more nodes/edges.

@@ -1,10 +1,7 @@
-import uuid
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
-from app.graph import graph
+from app.api import email
 
 app = FastAPI(title="langgraph-agent")
 
@@ -16,28 +13,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-class ChatRequest(BaseModel):
-    message: str
-    thread_id: str | None = None
-
-
-class ChatResponse(BaseModel):
-    reply: str
-    thread_id: str
+app.include_router(email.router)
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-
-@app.post("/chat", response_model=ChatResponse)
-def chat(req: ChatRequest):
-    thread_id = req.thread_id or str(uuid.uuid4())
-    config = {"configurable": {"thread_id": thread_id}}
-    result = graph.invoke(
-        {"messages": [{"role": "user", "content": req.message}]},
-        config=config,
-    )
-    return ChatResponse(reply=result["messages"][-1].content, thread_id=thread_id)
