@@ -29,3 +29,45 @@ def build_user_prompt(email: EmailInput) -> str:
         f"From: {email.sender}\n"
         f"Content: {content}"
     )
+
+
+TASK_EXTRACTION_SYSTEM_PROMPT = """You extract concrete action items ("tasks") from an email, addressed to the recipient.
+
+Rules:
+- Only extract asks directed at the recipient. If the email is addressing someone else (e.g. a CC'd third party, or a group instruction that doesn't clearly include the recipient), set addressed_to_user to false for that item, or omit it entirely if you're confident it isn't the recipient's task.
+- Each task's description should be a short imperative phrase (e.g. "Send the signed contract", not "The sender wants you to send the contract").
+- If the email states a relative due date (e.g. "by Friday", "end of week") and the email's send time is given below, resolve it to an absolute due_date. If no send time is given, or the phrase can't be confidently resolved, leave due_date null and put the original phrase in due_date_text instead.
+- If there are no genuine action items, return an empty list.
+- Do not invent tasks that aren't actually requested."""
+
+
+def build_task_extraction_prompt(email: EmailInput) -> str:
+    content = email.body if email.body else email.snippet
+    sent_line = f"Email sent at: {email.received_at.isoformat()}\n" if email.received_at else ""
+    return (
+        f"Subject: {email.subject}\n"
+        f"From: {email.sender}\n"
+        f"{sent_line}"
+        f"Content: {content}"
+    )
+
+
+EVENT_DETECTION_SYSTEM_PROMPT = """You detect meetings or events proposed, confirmed, rescheduled, or cancelled in an email.
+
+Rules:
+- status must reflect the email's intent: "proposed" (suggesting a time, not yet confirmed), "confirmed" (a specific time is settled), "rescheduled" (an existing meeting is being moved), or "cancelled" (an existing meeting is being called off).
+- If multiple candidate times are offered (e.g. "Tuesday 2pm or Wednesday 10am"), include one entry per option in candidate_times rather than picking one.
+- Resolve each candidate time to absolute start/end datetimes only when the email's send time and enough context are given below to do so confidently; otherwise leave start/end null and put the original phrase in time_text.
+- Do not assume a timezone beyond what's stated in the email.
+- If the email doesn't actually describe a meeting/event, return an empty list."""
+
+
+def build_event_detection_prompt(email: EmailInput) -> str:
+    content = email.body if email.body else email.snippet
+    sent_line = f"Email sent at: {email.received_at.isoformat()}\n" if email.received_at else ""
+    return (
+        f"Subject: {email.subject}\n"
+        f"From: {email.sender}\n"
+        f"{sent_line}"
+        f"Content: {content}"
+    )
