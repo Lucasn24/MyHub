@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ExternalLink, Mail, Paperclip } from "lucide-react";
 import styles from "./page.module.css";
@@ -54,6 +54,14 @@ export default function EmailPanel({
     setPrevEmails(emails);
     setLocalEmails(emails);
   }
+
+  // The background sync poller pushes a "new-emails" event the moment it processes
+  // unread mail; re-fetch the server component so the new messages show up live.
+  useEffect(() => {
+    const source = new EventSource("/api/emails/stream");
+    source.addEventListener("new-emails", () => router.refresh());
+    return () => source.close();
+  }, [router]);
 
   const toggleChecked = (id: string) => {
     setCheckedIds((prev) => {
