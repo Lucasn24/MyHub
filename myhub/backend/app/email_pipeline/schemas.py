@@ -1,3 +1,4 @@
+import datetime as dt
 from datetime import date, datetime
 from enum import Enum
 from typing import Literal
@@ -83,3 +84,30 @@ class DetectedEvent(BaseModel):
 
 class EventDetectionResult(BaseModel):
     events: list[DetectedEvent] = Field(default_factory=list)
+
+
+class ExpenseType(str, Enum):
+    GROCERIES = "groceries"
+    DINING = "dining"
+    TRANSPORT = "transport"
+    TRAVEL = "travel"
+    SHOPPING = "shopping"
+    SUBSCRIPTION = "subscription"
+    UTILITIES = "utilities"
+    ENTERTAINMENT = "entertainment"
+    HEALTH = "health"
+    HOUSING = "housing"
+    OTHER = "other"
+
+
+class ExtractedExpense(BaseModel):
+    title: str = Field(description="Short name for the purchase, e.g. the merchant or order description")
+    type: ExpenseType
+    cost: float = Field(description="Total amount charged, per the receipt")
+    date: "dt.date" = Field(description="Date the purchase/charge occurred, per the receipt")
+
+
+class ExpenseExtractionResult(BaseModel):
+    expense: ExtractedExpense | None = Field(
+        default=None, description="Null if the email isn't actually a receipt with an extractable charge"
+    )

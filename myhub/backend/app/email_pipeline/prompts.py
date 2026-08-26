@@ -71,3 +71,24 @@ def build_event_detection_prompt(email: EmailInput) -> str:
         f"{sent_line}"
         f"Content: {content}"
     )
+
+
+EXPENSE_EXTRACTION_SYSTEM_PROMPT = """You extract the purchase/charge described in a receipt, order confirmation, or invoice email.
+
+Rules:
+- title: a short name for the purchase — the merchant name, or a brief order description if that's clearer (e.g. "Uber ride", "Amazon order #123-4567").
+- type: pick the single best-fitting category: groceries, dining, transport, travel, shopping, subscription, utilities, entertainment, health, housing, or other.
+- cost: the total amount actually charged (not a subtotal, and not a listed original price if a discount was applied), as a plain number.
+- date: the date the purchase/charge occurred, per the receipt itself. If the receipt doesn't state a date but the email's send time is given below, use that as the date.
+- If this email doesn't actually contain a real purchase/charge to extract (e.g. it's a shipping notice with no amount, or a promotional email misfiled as a receipt), return null instead of guessing."""
+
+
+def build_expense_extraction_prompt(email: EmailInput) -> str:
+    content = email.body if email.body else email.snippet
+    sent_line = f"Email sent at: {email.received_at.isoformat()}\n" if email.received_at else ""
+    return (
+        f"Subject: {email.subject}\n"
+        f"From: {email.sender}\n"
+        f"{sent_line}"
+        f"Content: {content}"
+    )

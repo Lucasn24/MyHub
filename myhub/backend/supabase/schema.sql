@@ -73,8 +73,24 @@ alter table events add column if not exists confirmed boolean not null default f
 
 create index if not exists events_gmail_message_id_idx on events (gmail_message_id);
 
+create table if not exists expenses (
+    id uuid primary key default gen_random_uuid(),
+    gmail_message_id text not null references emails(gmail_message_id) on delete cascade,
+    title text not null,
+    type text not null check (type in (
+        'groceries', 'dining', 'transport', 'travel', 'shopping',
+        'subscription', 'utilities', 'entertainment', 'health', 'housing', 'other'
+    )),
+    cost numeric not null,
+    date date not null,
+    created_at timestamptz not null default now()
+);
+
+create index if not exists expenses_gmail_message_id_idx on expenses (gmail_message_id);
+
 -- Only the backend (service_role key, bypasses RLS) touches these tables for now.
 -- RLS is enabled with no policies so an anon/authenticated key can't read or write them later by accident.
 alter table emails enable row level security;
 alter table tasks enable row level security;
 alter table events enable row level security;
+alter table expenses enable row level security;

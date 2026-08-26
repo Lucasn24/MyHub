@@ -3,9 +3,11 @@ from functools import lru_cache
 from app.config import getLLM
 from app.email_pipeline.prompts import (
     EVENT_DETECTION_SYSTEM_PROMPT,
+    EXPENSE_EXTRACTION_SYSTEM_PROMPT,
     SYSTEM_PROMPT,
     TASK_EXTRACTION_SYSTEM_PROMPT,
     build_event_detection_prompt,
+    build_expense_extraction_prompt,
     build_task_extraction_prompt,
     build_user_prompt,
 )
@@ -15,6 +17,8 @@ from app.email_pipeline.schemas import (
     DetectedEvent,
     EmailInput,
     EventDetectionResult,
+    ExpenseExtractionResult,
+    ExtractedExpense,
     ExtractedTask,
     TaskExtractionResult,
 )
@@ -59,6 +63,19 @@ def detect_events(email: EmailInput) -> list[DetectedEvent]:
         {"role": "user", "content": build_event_detection_prompt(email)},
     ]
     return _get_event_detector().invoke(messages).events
+
+
+@lru_cache
+def _get_expense_extractor():
+    return getLLM().with_structured_output(ExpenseExtractionResult)
+
+
+def extract_expense(email: EmailInput) -> ExtractedExpense | None:
+    messages = [
+        {"role": "system", "content": EXPENSE_EXTRACTION_SYSTEM_PROMPT},
+        {"role": "user", "content": build_expense_extraction_prompt(email)},
+    ]
+    return _get_expense_extractor().invoke(messages).expense
 
 
 if __name__ == "__main__":

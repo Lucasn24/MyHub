@@ -3,11 +3,12 @@ from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from app.email_pipeline.agents import categorize_email, detect_events, extract_tasks
+from app.email_pipeline.agents import categorize_email, detect_events, extract_expense, extract_tasks
 from app.email_pipeline.schemas import (
     DetectedEvent,
     EmailCategory,
     EmailInput,
+    ExtractedExpense,
     ExtractedTask,
 )
 
@@ -17,6 +18,7 @@ class EmailPipelineState(TypedDict):
     category: EmailCategory | None
     tasks: list[ExtractedTask]
     events: list[DetectedEvent]
+    expense: ExtractedExpense | None
 
 
 def categorize_node(state: EmailPipelineState) -> dict:
@@ -32,11 +34,17 @@ def event_detection_node(state: EmailPipelineState) -> dict:
     return {"events": detect_events(state["email"])}
 
 
+def expense_extraction_node(state: EmailPipelineState) -> dict:
+    return {"expense": extract_expense(state["email"])}
+
+
 def route_after_categorize(state: EmailPipelineState) -> str:
     if state["category"] == EmailCategory.MEETING:
         return "event_detection"
     if state["category"] == EmailCategory.ACTION_REQUIRED:
         return "task_detection"
+    if state["category"] == EmailCategory.RECEIPT:
+        return "expense_extraction"
     return END
 
 
@@ -46,21 +54,34 @@ def get_email_pipeline_graph():
     graph.add_node("categorize", categorize_node)
     graph.add_node("event_detection", event_detection_node)
     graph.add_node("task_detection", task_detection_node)
+    graph.add_node("expense_extraction", expense_extraction_node)
 
     graph.add_edge(START, "categorize")
     graph.add_conditional_edges(
         "categorize",
         route_after_categorize,
-        {"event_detection": "event_detection", "task_detection": "task_detection", END: END},
+        {
+            "event_detection": "event_detection",
+            "task_detection": "task_detection",
+            "expense_extraction": "expense_extraction",
+            END: END,
+        },
     )
     graph.add_edge("event_detection", END)
     graph.add_edge("task_detection", END)
+    graph.add_edge("expense_extraction", END)
 
     return graph.compile()
 
 
 def run_email_pipeline(email: EmailInput) -> EmailPipelineState:
-    initial_state: EmailPipelineState = {"email": email, "category": None, "tasks": [], "events": []}
+    initial_state: EmailPipelineState = {
+        "email": email,
+        "category": None,
+        "tasks": [],
+        "events": [],
+        "expense": None,
+    }
     return get_email_pipeline_graph().invoke(initial_state)
 
 

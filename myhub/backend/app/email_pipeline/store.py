@@ -1,5 +1,5 @@
 from app.config import get_supabase_client
-from app.email_pipeline.schemas import DetectedEvent, EmailInput, ExtractedTask
+from app.email_pipeline.schemas import DetectedEvent, EmailInput, ExtractedExpense, ExtractedTask
 
 
 def upsert_email_base(gmail_message_id: str, email: EmailInput) -> None:
@@ -27,7 +27,7 @@ def list_inbox_emails(limit: int = 100) -> list[dict]:
     result = (
         get_supabase_client()
         .table("emails")
-        .select("*, tasks(*), events(*)")
+        .select("*, tasks(*), events(*), expenses(*)")
         .order("received_at", desc=True)
         .limit(limit)
         .execute()
@@ -37,6 +37,18 @@ def list_inbox_emails(limit: int = 100) -> list[dict]:
 
 def delete_email(gmail_message_id: str) -> None:
     get_supabase_client().table("emails").delete().eq("gmail_message_id", gmail_message_id).execute()
+
+
+def list_expenses(limit: int = 200) -> list[dict]:
+    result = (
+        get_supabase_client()
+        .table("expenses")
+        .select("*, emails(subject, sender)")
+        .order("date", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return result.data
 
 
 def confirm_task(task_id: str, updates: dict) -> None:
@@ -68,6 +80,21 @@ def replace_tasks(gmail_message_id: str, tasks: list[ExtractedTask]) -> None:
                 }
                 for t in tasks
             ]
+        ).execute()
+
+
+def replace_expense(gmail_message_id: str, expense: ExtractedExpense | None) -> None:
+    client = get_supabase_client()
+    client.table("expenses").delete().eq("gmail_message_id", gmail_message_id).execute()
+    if expense:
+        client.table("expenses").insert(
+            {
+                "gmail_message_id": gmail_message_id,
+                "title": expense.title,
+                "type": expense.type.value,
+                "cost": expense.cost,
+                "date": expense.date.isoformat(),
+            }
         ).execute()
 
 

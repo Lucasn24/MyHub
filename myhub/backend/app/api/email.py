@@ -4,16 +4,24 @@ from typing import Literal
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.email_pipeline.agents import categorize_email, detect_events, extract_tasks
+from app.email_pipeline.agents import categorize_email, detect_events, extract_expense, extract_tasks
 from app.email_pipeline.graph import run_email_pipeline
-from app.email_pipeline.schemas import CategoryResult, DetectedEvent, EmailInput, ExtractedTask
+from app.email_pipeline.schemas import (
+    CategoryResult,
+    DetectedEvent,
+    EmailInput,
+    ExtractedExpense,
+    ExtractedTask,
+)
 from app.email_pipeline.store import (
     confirm_event,
     confirm_task,
     delete_email,
+    list_expenses,
     list_inbox_emails,
     list_known_message_ids,
     replace_events,
+    replace_expense,
     replace_tasks,
     set_email_category,
     upsert_email_base,
@@ -40,10 +48,16 @@ class EventDetectionResponse(BaseModel):
     events: list[DetectedEvent]
 
 
+class ExpenseExtractionResponse(BaseModel):
+    id: str | None = None
+    expense: ExtractedExpense | None
+
+
 class ProcessEmailResponse(CategoryResult):
     id: str | None = None
     tasks: list[ExtractedTask]
     events: list[DetectedEvent]
+    expense: ExtractedExpense | None
 
 
 class ConfirmTaskRequest(BaseModel):
@@ -90,9 +104,19 @@ def extract_events_route(req: EmailRequest):
     return EventDetectionResponse(id=req.id, events=events)
 
 
+@router.post("/extract-expense", response_model=ExpenseExtractionResponse)
+def extract_expense_route(req: EmailRequest):
+    email = EmailInput(**req.model_dump(exclude={"id"}))
+    expense = extract_expense(email)
+    if req.id:
+        upsert_email_base(req.id, email)
+        replace_expense(req.id, expense)
+    return ExpenseExtractionResponse(id=req.id, expense=expense)
+
+
 @router.post("/process", response_model=ProcessEmailResponse)
 def process(req: EmailRequest):
-    """Run the full langgraph pipeline: categorize, then route to task/event detection."""
+    """Run the full langgraph pipeline: categorize, then route to task/event/expense extraction."""
     email = EmailInput(**req.model_dump(exclude={"id"}))
     result = run_email_pipeline(email)
     if req.id:
@@ -102,17 +126,25 @@ def process(req: EmailRequest):
             replace_tasks(req.id, result["tasks"])
         if result["events"]:
             replace_events(req.id, result["events"])
+        if result["expense"]:
+            replace_expense(req.id, result["expense"])
     return ProcessEmailResponse(
         id=req.id,
         category=result["category"],
         tasks=result["tasks"],
         events=result["events"],
+        expense=result["expense"],
     )
 
 
 @router.get("/inbox")
 def inbox(limit: int = 100):
     return {"emails": list_inbox_emails(limit)}
+
+
+@router.get("/expenses")
+def expenses(limit: int = 200):
+    return {"expenses": list_expenses(limit)}
 
 
 @router.get("/known-ids")
