@@ -3,7 +3,6 @@ from app.config import get_supabase_client
 TASKS_TABLE = "planner_tasks"
 BLOCKS_TABLE = "planner_blocks"
 TAGS_TABLE = "planner_tags"
-GOALS_TABLE = "planner_goals"
 
 
 def get_planner_state() -> dict:
@@ -11,8 +10,7 @@ def get_planner_state() -> dict:
     tasks = client.table(TASKS_TABLE).select("*").order("created_at").execute().data
     blocks = client.table(BLOCKS_TABLE).select("*").order("created_at").execute().data
     tags = client.table(TAGS_TABLE).select("*").order("created_at").execute().data
-    goals = client.table(GOALS_TABLE).select("*").order("created_at").execute().data
-    return {"tasks": tasks, "blocks": blocks, "tags": tags, "goals": goals}
+    return {"tasks": tasks, "blocks": blocks, "tags": tags}
 
 
 def create_task(row: dict) -> dict:
@@ -48,6 +46,10 @@ def create_tag(row: dict) -> dict:
     return result.data[0]
 
 
-def create_goal(row: dict) -> dict:
-    result = get_supabase_client().table(GOALS_TABLE).insert(row).execute()
+def update_tag(tag_id: str, updates: dict) -> dict:
+    result = get_supabase_client().table(TAGS_TABLE).update(updates).eq("id", tag_id).execute()
     return result.data[0]
+
+
+def delete_tag(tag_id: str) -> None:
+    get_supabase_client().table(TAGS_TABLE).delete().eq("id", tag_id).execute()

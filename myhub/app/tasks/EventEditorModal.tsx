@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { Goal, RepeatFreq, RepeatRule, ScheduleBlock, Tag } from "./types";
-import { DURATION_OPTIONS_MINUTES, getGoalColor } from "./constants";
+import type { RepeatFreq, RepeatRule, ScheduleBlock, Tag } from "./types";
+import { DURATION_OPTIONS_MINUTES, getTagColor } from "./constants";
 import { WEEKDAY_LABELS } from "./occurrences";
 import { minutesToTime, timeToMinutes } from "./time";
 import modalStyles from "./modal.module.css";
@@ -11,24 +11,21 @@ import styles from "./TaskCreatorModal.module.css";
 export default function EventEditorModal({
   block,
   tags,
-  goals,
   onClose,
-  onCreateGoal,
+  onCreateTag,
   onSave,
 }: {
   block: ScheduleBlock;
   tags: Tag[];
-  goals: Goal[];
   onClose: () => void;
-  onCreateGoal: (goal: Goal) => void;
+  onCreateTag: (tag: Tag) => void;
   onSave: (blockId: string, updates: Partial<ScheduleBlock>) => void;
 }) {
   const [title, setTitle] = useState(block.title);
   const [notes, setNotes] = useState(block.notes ?? "");
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(block.tagIds);
-  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(block.goalId ?? null);
-  const [newGoalLabel, setNewGoalLabel] = useState("");
-  const [showGoalForm, setShowGoalForm] = useState(false);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(block.tagId ?? null);
+  const [newTagLabel, setNewTagLabel] = useState("");
+  const [showTagForm, setShowTagForm] = useState(false);
   const [startTime, setStartTime] = useState(block.startTime);
   const [duration, setDuration] = useState(
     Math.max(15, timeToMinutes(block.endTime) - timeToMinutes(block.startTime))
@@ -37,22 +34,18 @@ export default function EventEditorModal({
   const [repeatDays, setRepeatDays] = useState<number[]>(block.repeat?.daysOfWeek ?? []);
   const [error, setError] = useState<string | null>(null);
 
-  const toggleTag = (id: string) => {
-    setSelectedTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
-  };
-
   const toggleWeekday = (day: number) => {
     setRepeatDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()));
   };
 
-  const handleAddGoal = () => {
-    const label = newGoalLabel.trim();
+  const handleAddTag = () => {
+    const label = newTagLabel.trim();
     if (!label) return;
-    const goal: Goal = { id: crypto.randomUUID(), label, createdAt: new Date().toISOString() };
-    onCreateGoal(goal);
-    setSelectedGoalId(goal.id);
-    setNewGoalLabel("");
-    setShowGoalForm(false);
+    const tag: Tag = { id: crypto.randomUUID(), label, createdAt: new Date().toISOString() };
+    onCreateTag(tag);
+    setSelectedTagId(tag.id);
+    setNewTagLabel("");
+    setShowTagForm(false);
   };
 
   const handleSubmit = () => {
@@ -72,8 +65,7 @@ export default function EventEditorModal({
     onSave(block.id, {
       title: trimmed,
       notes: notes.trim() || undefined,
-      tagIds: selectedTagIds,
-      goalId: selectedGoalId ?? undefined,
+      tagId: selectedTagId ?? undefined,
       repeat,
       startTime,
       endTime: minutesToTime(timeToMinutes(startTime) + duration),
@@ -108,59 +100,39 @@ export default function EventEditorModal({
         </div>
 
         <div className={styles.formField}>
-          <label>Tags</label>
+          <label>Tag</label>
           <div className={styles.tagRow}>
-            {tags.map((tag) => {
-              const active = selectedTagIds.includes(tag.id);
+            {tags.map((tag, index) => {
+              const color = getTagColor(index);
+              const active = selectedTagId === tag.id;
               return (
                 <button
                   key={tag.id}
                   type="button"
                   className={`${styles.tagOption} ${active ? styles.tagOptionActive : ""}`}
-                  style={active ? { backgroundColor: tag.color, borderColor: tag.color } : { borderColor: tag.color }}
-                  onClick={() => toggleTag(tag.id)}
+                  style={active ? { backgroundColor: color, borderColor: color } : { borderColor: color }}
+                  onClick={() => setSelectedTagId((prev) => (prev === tag.id ? null : tag.id))}
                 >
                   {tag.label}
                 </button>
               );
             })}
-          </div>
-        </div>
-
-        <div className={styles.formField}>
-          <label>Goal</label>
-          <div className={styles.tagRow}>
-            {goals.map((goal, index) => {
-              const color = getGoalColor(index);
-              const active = selectedGoalId === goal.id;
-              return (
-                <button
-                  key={goal.id}
-                  type="button"
-                  className={`${styles.tagOption} ${active ? styles.tagOptionActive : ""}`}
-                  style={active ? { backgroundColor: color, borderColor: color } : { borderColor: color }}
-                  onClick={() => setSelectedGoalId((prev) => (prev === goal.id ? null : goal.id))}
-                >
-                  {goal.label}
-                </button>
-              );
-            })}
-            <button type="button" className={styles.addTagButton} onClick={() => setShowGoalForm((v) => !v)}>
-              + New goal
+            <button type="button" className={styles.addTagButton} onClick={() => setShowTagForm((v) => !v)}>
+              + New tag
             </button>
           </div>
 
-          {showGoalForm && (
+          {showTagForm && (
             <div className={styles.newTagForm}>
               <input
                 type="text"
                 className={styles.formInput}
-                placeholder="Goal name (e.g. Investments)"
-                value={newGoalLabel}
-                onChange={(e) => setNewGoalLabel(e.target.value)}
+                placeholder="Tag name (e.g. Investments)"
+                value={newTagLabel}
+                onChange={(e) => setNewTagLabel(e.target.value)}
               />
-              <button type="button" className={modalStyles.secondaryButton} onClick={handleAddGoal}>
-                Add goal
+              <button type="button" className={modalStyles.secondaryButton} onClick={handleAddTag}>
+                Add tag
               </button>
             </div>
           )}

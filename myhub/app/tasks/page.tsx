@@ -1,16 +1,15 @@
 import TasksBoard from "./TasksBoard";
-import { rowToBlock, rowToGoal, rowToTag, rowToTask } from "./serialization";
+import { rowToBlock, rowToTag, rowToTask } from "./serialization";
 import { GRID_END_HOUR, GRID_START_HOUR, minutesToTime, toISODate } from "./time";
 import { getPlannerState } from "@/lib/backend";
 import { listEventsForDate } from "@/lib/google/calendar";
 import { hasTokens } from "@/lib/google/tokenStore";
-import type { CalendarEvent, Goal, ScheduleBlock, Tag, Task } from "./types";
+import type { CalendarEvent, ScheduleBlock, Tag, Task } from "./types";
 
 async function loadPlannerState(): Promise<{
   tasks: Task[];
   blocks: ScheduleBlock[];
   tags: Tag[];
-  goals: Goal[];
 }> {
   try {
     const state = await getPlannerState();
@@ -18,11 +17,10 @@ async function loadPlannerState(): Promise<{
       tasks: state.tasks.map(rowToTask),
       blocks: state.blocks.map(rowToBlock),
       tags: state.tags.map(rowToTag),
-      goals: state.goals.map(rowToGoal),
     };
   } catch (err) {
     console.error("Failed to load planner state from backend:", err);
-    return { tasks: [], blocks: [], tags: [], goals: [] };
+    return { tasks: [], blocks: [], tags: [] };
   }
 }
 
@@ -55,18 +53,12 @@ async function loadCalendarEvents(dateISO: string): Promise<CalendarEvent[]> {
 
 export default async function TasksPage() {
   const todayISO = toISODate(new Date());
-  const [{ tasks, blocks, tags, goals }, calendarEvents] = await Promise.all([
+  const [{ tasks, blocks, tags }, calendarEvents] = await Promise.all([
     loadPlannerState(),
     loadCalendarEvents(todayISO),
   ]);
 
   return (
-    <TasksBoard
-      initialTasks={tasks}
-      initialBlocks={blocks}
-      initialTags={tags}
-      initialGoals={goals}
-      calendarEvents={calendarEvents}
-    />
+    <TasksBoard initialTasks={tasks} initialBlocks={blocks} initialTags={tags} calendarEvents={calendarEvents} />
   );
 }

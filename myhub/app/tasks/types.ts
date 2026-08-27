@@ -9,12 +9,6 @@ export type RepeatRule = {
 export type Tag = {
   id: string;
   label: string;
-  color: string;
-};
-
-export type Goal = {
-  id: string;
-  label: string;
   createdAt: string;
 };
 
@@ -24,24 +18,21 @@ export type Task = {
   notes?: string;
   dueDate?: string; // ISO date
   dueTime?: string; // "HH:mm"
-  tagIds: string[];
-  goalId?: string;
-  repeat?: RepeatRule;
+  tagId?: string;
+  eventId?: string; // optional link to an existing ScheduleBlock, for organization only
   completedDates: string[]; // ISO dates this task was completed on
   createdAt: string;
 };
 
 export type ScheduleBlock = {
   id: string;
-  taskId?: string;
   title: string;
   notes?: string;
   date: string; // ISO date
   startTime: string; // "HH:mm", 15-min aligned
   endTime: string; // "HH:mm", 15-min aligned
-  tagIds: string[];
-  goalId?: string; // events only — task-derived blocks get their goal from the task
-  repeat?: RepeatRule; // events only
+  tagId?: string;
+  repeat?: RepeatRule;
   pushedToGoogle: boolean;
 };
 

@@ -162,36 +162,26 @@ export type PlannerTaskRow = {
   notes: string | null;
   due_date: string | null;
   due_time: string | null;
-  tag_ids: string[];
-  goal_id: string | null;
-  repeat: PlannerRepeatRow | null;
+  tag_id: string | null;
+  event_id: string | null;
   completed_dates: string[];
   created_at: string;
 };
 
 export type PlannerBlockRow = {
   id: string;
-  task_id: string | null;
   title: string;
   notes: string | null;
   date: string;
   start_time: string;
   end_time: string;
-  tag_ids: string[];
-  goal_id: string | null;
+  tag_id: string | null;
   repeat: PlannerRepeatRow | null;
   pushed_to_google: boolean;
   created_at: string;
 };
 
 export type PlannerTagRow = {
-  id: string;
-  label: string;
-  color: string;
-  created_at: string;
-};
-
-export type PlannerGoalRow = {
   id: string;
   label: string;
   created_at: string;
@@ -201,7 +191,6 @@ export type PlannerState = {
   tasks: PlannerTaskRow[];
   blocks: PlannerBlockRow[];
   tags: PlannerTagRow[];
-  goals: PlannerGoalRow[];
 };
 
 export async function getPlannerState(): Promise<PlannerState> {
@@ -248,6 +237,13 @@ export async function createPlannerTag(row: Omit<PlannerTagRow, "created_at">): 
   return request<PlannerTagRow>("/planner/tags", { method: "POST", body: JSON.stringify(row) });
 }
 
-export async function createPlannerGoal(row: Omit<PlannerGoalRow, "created_at">): Promise<PlannerGoalRow> {
-  return request<PlannerGoalRow>("/planner/goals", { method: "POST", body: JSON.stringify(row) });
+export async function updatePlannerTag(id: string, updates: { label: string }): Promise<PlannerTagRow> {
+  return request<PlannerTagRow>(`/planner/tags/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function deletePlannerTag(id: string): Promise<void> {
+  await request(`/planner/tags/${encodeURIComponent(id)}`, { method: "DELETE" });
 }

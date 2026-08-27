@@ -6,15 +6,14 @@ import { Plus } from "lucide-react";
 import styles from "./page.module.css";
 import TimetableGrid from "./TimetableGrid";
 import TodoList from "./TodoList";
-import GoalCards from "./GoalCards";
-import GoalDetailModal from "./GoalDetailModal";
+import TagCards from "./TagCards";
+import TagDetailModal from "./TagDetailModal";
 import HoursChart from "./HoursChart";
 import TaskCreatorModal from "./TaskCreatorModal";
 import EventEditorModal from "./EventEditorModal";
-import { occursOn } from "./occurrences";
-import { blockToRow, blockUpdatesToRow, goalToRow, tagToRow, taskToRow, taskUpdatesToRow } from "./serialization";
-import { GRID_END_HOUR, GRID_START_HOUR, minutesToTime, timeToMinutes, toISODate } from "./time";
-import type { CalendarEvent, Goal, ScheduleBlock, Tag, Task } from "./types";
+import { blockToRow, blockUpdatesToRow, tagToRow, taskToRow, taskUpdatesToRow } from "./serialization";
+import { minutesToTime, timeToMinutes, toISODate } from "./time";
+import type { CalendarEvent, ScheduleBlock, Tag, Task } from "./types";
 
 function apiJSON(url: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) {
   return fetch(url, {
@@ -41,13 +40,11 @@ export default function TasksBoard({
   initialTasks,
   initialBlocks,
   initialTags,
-  initialGoals,
   calendarEvents,
 }: {
   initialTasks: Task[];
   initialBlocks: ScheduleBlock[];
   initialTags: Tag[];
-  initialGoals: Goal[];
   calendarEvents: CalendarEvent[];
 }) {
   const router = useRouter();
@@ -56,15 +53,13 @@ export default function TasksBoard({
   const [tasks, setTasks] = useResyncedState(initialTasks);
   const [blocks, setBlocks] = useResyncedState(initialBlocks);
   const [tags, setTags] = useResyncedState(initialTags);
-  const [goals, setGoals] = useResyncedState(initialGoals);
 
   const [creatorOpen, setCreatorOpen] = useState<null | true | { startTime: string; endTime: string }>(null);
-  const [openGoalId, setOpenGoalId] = useState<string | null>(null);
+  const [openTagId, setOpenTagId] = useState<string | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
 
-  const todaysTasks = tasks.filter((t) => occursOn(t.repeat, todayISO));
   const todaysBlocks = blocks.filter((b) => b.date === todayISO);
-  const openGoal = goals.find((g) => g.id === openGoalId) ?? null;
+  const openTag = tags.find((t) => t.id === openTagId) ?? null;
   const editingBlock = blocks.find((b) => b.id === editingBlockId) ?? null;
 
   const handleCreate = async ({ task, block }: { task?: Task; block?: ScheduleBlock }) => {
@@ -103,12 +98,26 @@ export default function TasksBoard({
     router.refresh();
   };
 
-  const handleCreateGoal = async (goal: Goal) => {
-    setGoals((prev) => [...prev, goal]);
+  const handleUpdateTag = async (tagId: string, label: string) => {
+    setTags((prev) => prev.map((t) => (t.id === tagId ? { ...t, label } : t)));
+    setOpenTagId(null);
     try {
-      await apiJSON("/api/planner/goals", "POST", goalToRow(goal));
+      await apiJSON(`/api/planner/tags/${tagId}`, "PATCH", { label });
     } catch (err) {
-      console.error("Failed to save goal:", err);
+      console.error("Failed to save tag:", err);
+    }
+    router.refresh();
+  };
+
+  const handleDeleteTag = async (tagId: string) => {
+    setTags((prev) => prev.filter((t) => t.id !== tagId));
+    setTasks((prev) => prev.map((t) => (t.tagId === tagId ? { ...t, tagId: undefined } : t)));
+    setBlocks((prev) => prev.map((b) => (b.tagId === tagId ? { ...b, tagId: undefined } : b)));
+    setOpenTagId(null);
+    try {
+      await apiJSON(`/api/planner/tags/${tagId}`, "DELETE");
+    } catch (err) {
+      console.error("Failed to delete tag:", err);
     }
     router.refresh();
   };
@@ -131,9 +140,7 @@ export default function TasksBoard({
 
   const handleDeleteTask = async (taskId: string) => {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
-    setBlocks((prev) => prev.filter((b) => b.taskId !== taskId));
     try {
-      // The DB cascades planner_blocks on task delete, so no separate block deletes needed.
       await apiJSON(`/api/planner/tasks/${taskId}`, "DELETE");
     } catch (err) {
       console.error("Failed to delete task:", err);
@@ -141,56 +148,7 @@ export default function TasksBoard({
     router.refresh();
   };
 
-  const makeBlockForTask = (task: Task, startTime: string): ScheduleBlock => ({
-    id: crypto.randomUUID(),
-    taskId: task.id,
-    title: task.title,
-    date: todayISO,
-    startTime,
-    endTime: minutesToTime(timeToMinutes(startTime) + 30),
-    tagIds: task.tagIds,
-    pushedToGoogle: false,
-  });
-
-  const createBlock = async (block: ScheduleBlock) => {
-    setBlocks((prev) => [...prev, block]);
-    try {
-      await apiJSON("/api/planner/blocks", "POST", blockToRow(block));
-    } catch (err) {
-      console.error("Failed to save block:", err);
-    }
-    router.refresh();
-  };
-
-  const handleQuickSchedule = (task: Task) => {
-    const now = new Date();
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-    const snapped = Math.min(
-      GRID_END_HOUR * 60 - 30,
-      Math.max(GRID_START_HOUR * 60, Math.ceil(nowMinutes / 15) * 15)
-    );
-    void createBlock(makeBlockForTask(task, minutesToTime(snapped)));
-  };
-
-  const handleDropTask = (taskId: string, startTime: string) => {
-    const task = tasks.find((t) => t.id === taskId);
-    if (!task) return;
-    void createBlock(makeBlockForTask(task, startTime));
-  };
-
   const handleCreateRange = (range: { startTime: string; endTime: string }) => setCreatorOpen(range);
-
-  const handleMoveBlock = async (blockId: string, startTime: string) => {
-    const block = blocks.find((b) => b.id === blockId);
-    if (!block) return;
-    const duration = timeToMinutes(block.endTime) - timeToMinutes(block.startTime);
-    const endTime = minutesToTime(timeToMinutes(startTime) + duration);
-    await handleUpdateBlockSilently(blockId, { startTime, endTime });
-  };
-
-  const handleResizeBlock = async (blockId: string, endTime: string) => {
-    await handleUpdateBlockSilently(blockId, { endTime });
-  };
 
   // Like handleUpdateBlock, but doesn't touch the edit-modal state — used by the
   // drag-to-move/resize handlers, which commit directly without opening the modal.
@@ -204,8 +162,21 @@ export default function TasksBoard({
     router.refresh();
   };
 
+  const handleMoveBlock = async (blockId: string, startTime: string) => {
+    const block = blocks.find((b) => b.id === blockId);
+    if (!block) return;
+    const duration = timeToMinutes(block.endTime) - timeToMinutes(block.startTime);
+    const endTime = minutesToTime(timeToMinutes(startTime) + duration);
+    await handleUpdateBlockSilently(blockId, { startTime, endTime });
+  };
+
+  const handleResizeBlock = async (blockId: string, endTime: string) => {
+    await handleUpdateBlockSilently(blockId, { endTime });
+  };
+
   const handleDeleteBlock = async (blockId: string) => {
     setBlocks((prev) => prev.filter((b) => b.id !== blockId));
+    setTasks((prev) => prev.map((t) => (t.eventId === blockId ? { ...t, eventId: undefined } : t)));
     try {
       await apiJSON(`/api/planner/blocks/${blockId}`, "DELETE");
     } catch (err) {
@@ -250,20 +221,19 @@ export default function TasksBoard({
         </button>
       </div>
 
-      <GoalCards goals={goals} tasks={tasks} onOpenGoal={setOpenGoalId} onCreateGoal={handleCreateGoal} />
+      <TagCards tags={tags} tasks={tasks} onOpenTag={setOpenTagId} onCreateTag={handleCreateTag} />
 
       <div className={styles.content}>
         <div className={styles.timetableColumn}>
           <div className={styles.sectionHeader}>
             <span className={styles.sectionTitle}>TIMETABLE</span>
-            <span className={styles.runningCount}>Drag to create a block · drag a to-do in to schedule it</span>
+            <span className={styles.runningCount}>Drag to create a block</span>
           </div>
           <TimetableGrid
             blocks={todaysBlocks}
             tags={tags}
             calendarEvents={calendarEvents}
             onCreateRange={handleCreateRange}
-            onDropTask={handleDropTask}
             onMoveBlock={handleMoveBlock}
             onResizeBlock={handleResizeBlock}
             onDeleteBlock={handleDeleteBlock}
@@ -276,16 +246,15 @@ export default function TasksBoard({
           <div className={styles.sideHalf}>
             <div className={styles.sectionHeader}>
               <span className={styles.sectionTitle}>TO-DO</span>
-              <span className={styles.runningCount}>{todaysTasks.length} total</span>
+              <span className={styles.runningCount}>{tasks.length} total</span>
             </div>
             <TodoList
-              tasks={todaysTasks}
+              tasks={tasks}
               tags={tags}
-              goals={goals}
+              blocks={blocks}
               todayISO={todayISO}
               onToggleComplete={handleToggleComplete}
               onDelete={handleDeleteTask}
-              onQuickSchedule={handleQuickSchedule}
             />
           </div>
 
@@ -293,7 +262,7 @@ export default function TasksBoard({
             <div className={styles.sectionHeader}>
               <span className={styles.sectionTitle}>DISTRIBUTION</span>
             </div>
-            <HoursChart goals={goals} tasks={tasks} blocks={blocks} todayISO={todayISO} />
+            <HoursChart tags={tags} blocks={blocks} todayISO={todayISO} />
           </div>
         </div>
       </div>
@@ -301,27 +270,31 @@ export default function TasksBoard({
       {creatorOpen !== null && (
         <TaskCreatorModal
           tags={tags}
-          goals={goals}
+          todaysEvents={todaysBlocks}
           todayISO={todayISO}
           initialRange={creatorOpen === true ? null : creatorOpen}
           onClose={() => setCreatorOpen(null)}
           onCreateTag={handleCreateTag}
-          onCreateGoal={handleCreateGoal}
           onCreate={handleCreate}
         />
       )}
 
-      {openGoal && (
-        <GoalDetailModal goal={openGoal} tasks={tasks} blocks={blocks} onClose={() => setOpenGoalId(null)} />
+      {openTag && (
+        <TagDetailModal
+          tag={openTag}
+          tasks={tasks}
+          onClose={() => setOpenTagId(null)}
+          onSave={handleUpdateTag}
+          onDelete={handleDeleteTag}
+        />
       )}
 
       {editingBlock && (
         <EventEditorModal
           block={editingBlock}
           tags={tags}
-          goals={goals}
           onClose={() => setEditingBlockId(null)}
-          onCreateGoal={handleCreateGoal}
+          onCreateTag={handleCreateTag}
           onSave={handleUpdateBlock}
         />
       )}

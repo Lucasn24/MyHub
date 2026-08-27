@@ -98,27 +98,83 @@ alter table expenses enable row level security;
 -- Tasks page (personal planner) tables -- distinct from the email-derived
 -- `tasks`/`events` above, which come from parsing inbox messages, not the
 -- Tasks page UI. Prefixed `planner_` to avoid colliding with those.
+--
+-- `planner_tags` is the single categorization entity for the Tasks page.
+-- Earlier iterations had two separate concepts here -- a free-form colored
+-- "tag" (Work/Personal/Urgent) and a goal-tracking "goal" -- which have been
+-- collapsed into one. The migration block below folds an existing install's
+-- data into this shape; it's a no-op on a fresh database.
 
-create table if not exists planner_goals (
+-- Migration: fold the old planner_tags (Work/Personal/Urgent) + planner_goals
+-- into a single planner_tags table (planner_goals wins the name and the data;
+-- the old planner_tags is dropped). Gated on planner_goals still existing, so
+-- this whole block is a no-op once already applied (or on a fresh database).
+do $$
+begin
+  if to_regclass('public.planner_goals') is not null then
+    drop table if exists planner_tags cascade;
+    alter table planner_goals rename to planner_tags;
+  end if;
+end $$;
+
+-- Migration: planner_tasks/planner_blocks columns -- rename goal_id to
+-- tag_id, drop the old tag_ids array and (tasks-only) repeat, add
+-- planner_tasks.event_id, drop planner_blocks.task_id (tasks are no longer
+-- schedulable as blocks -- see planner_tasks.event_id instead, which links a
+-- task to an existing event for organization without putting the task on
+-- the timetable itself). Each step is independently guarded, so re-running
+-- this file is safe.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'planner_tasks' and column_name = 'goal_id'
+  ) then
+    alter table planner_tasks rename column goal_id to tag_id;
+  end if;
+
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'planner_blocks' and column_name = 'goal_id'
+  ) then
+    alter table planner_blocks rename column goal_id to tag_id;
+  end if;
+end $$;
+
+alter table if exists planner_tasks drop column if exists tag_ids;
+alter table if exists planner_tasks drop column if exists repeat;
+alter table if exists planner_tasks
+    add column if not exists event_id uuid references planner_blocks(id) on delete set null;
+alter table if exists planner_blocks drop column if exists tag_ids;
+alter table if exists planner_blocks drop column if exists task_id;
+
+drop index if exists planner_tasks_goal_id_idx;
+drop index if exists planner_blocks_goal_id_idx;
+
+-- Desired end-state shape (also what a fresh database gets):
+
+create table if not exists planner_tags (
     id uuid primary key default gen_random_uuid(),
     label text not null,
     created_at timestamptz not null default now()
 );
 
--- text id (not uuid) so the three seeded defaults below can use stable,
--- human-readable ids; client-created tags still just use crypto.randomUUID().
-create table if not exists planner_tags (
-    id text primary key,
-    label text not null,
-    color text not null,
+create table if not exists planner_blocks (
+    id uuid primary key default gen_random_uuid(),
+    title text not null,
+    notes text,
+    date date not null,
+    start_time text not null,
+    end_time text not null,
+    tag_id uuid references planner_tags(id) on delete set null,
+    -- {freq: "daily"|"weekly", daysOfWeek: number[]|null, endDate: string|null},
+    -- kept as-is from the frontend's RepeatRule type -- no SQL ever reaches inside it.
+    repeat jsonb,
+    pushed_to_google boolean not null default false,
     created_at timestamptz not null default now()
 );
 
-insert into planner_tags (id, label, color) values
-    ('work', 'Work', '#3b82f6'),
-    ('personal', 'Personal', '#10b981'),
-    ('urgent', 'Urgent', '#ef4444')
-on conflict (id) do nothing;
+create index if not exists planner_blocks_date_idx on planner_blocks (date);
 
 create table if not exists planner_tasks (
     id uuid primary key default gen_random_uuid(),
@@ -126,37 +182,17 @@ create table if not exists planner_tasks (
     notes text,
     due_date date,
     due_time text,
-    tag_ids text[] not null default '{}',
-    goal_id uuid references planner_goals(id) on delete set null,
-    -- {freq: "daily"|"weekly", daysOfWeek: number[]|null, endDate: string|null},
-    -- kept as-is from the frontend's RepeatRule type -- no SQL ever reaches inside it.
-    repeat jsonb,
+    tag_id uuid references planner_tags(id) on delete set null,
+    -- Optional link to an existing event, for organizing a task alongside it
+    -- -- tasks themselves are never scheduled as timetable blocks.
+    event_id uuid references planner_blocks(id) on delete set null,
     completed_dates text[] not null default '{}',
     created_at timestamptz not null default now()
 );
 
-create index if not exists planner_tasks_goal_id_idx on planner_tasks (goal_id);
+create index if not exists planner_tasks_tag_id_idx on planner_tasks (tag_id);
+create index if not exists planner_tasks_event_id_idx on planner_tasks (event_id);
 
-create table if not exists planner_blocks (
-    id uuid primary key default gen_random_uuid(),
-    task_id uuid references planner_tasks(id) on delete cascade,
-    title text not null,
-    notes text,
-    date date not null,
-    start_time text not null,
-    end_time text not null,
-    tag_ids text[] not null default '{}',
-    -- events only -- a task-derived block gets its goal from the task itself.
-    goal_id uuid references planner_goals(id) on delete set null,
-    repeat jsonb,
-    pushed_to_google boolean not null default false,
-    created_at timestamptz not null default now()
-);
-
-create index if not exists planner_blocks_task_id_idx on planner_blocks (task_id);
-create index if not exists planner_blocks_date_idx on planner_blocks (date);
-
-alter table planner_goals enable row level security;
 alter table planner_tags enable row level security;
 alter table planner_tasks enable row level security;
 alter table planner_blocks enable row level security;

@@ -3,13 +3,14 @@ from pydantic import BaseModel
 
 from app.planner_store import (
     create_block,
-    create_goal,
     create_tag,
     create_task,
     delete_block,
+    delete_tag,
     delete_task,
     get_planner_state,
     update_block,
+    update_tag,
     update_task,
 )
 
@@ -22,9 +23,8 @@ class TaskCreateRequest(BaseModel):
     notes: str | None = None
     due_date: str | None = None
     due_time: str | None = None
-    tag_ids: list[str] = []
-    goal_id: str | None = None
-    repeat: dict | None = None
+    tag_id: str | None = None
+    event_id: str | None = None
     completed_dates: list[str] = []
 
 
@@ -33,22 +33,19 @@ class TaskUpdateRequest(BaseModel):
     notes: str | None = None
     due_date: str | None = None
     due_time: str | None = None
-    tag_ids: list[str] | None = None
-    goal_id: str | None = None
-    repeat: dict | None = None
+    tag_id: str | None = None
+    event_id: str | None = None
     completed_dates: list[str] | None = None
 
 
 class BlockCreateRequest(BaseModel):
     id: str
-    task_id: str | None = None
     title: str
     notes: str | None = None
     date: str
     start_time: str
     end_time: str
-    tag_ids: list[str] = []
-    goal_id: str | None = None
+    tag_id: str | None = None
     repeat: dict | None = None
     pushed_to_google: bool = False
 
@@ -59,8 +56,7 @@ class BlockUpdateRequest(BaseModel):
     date: str | None = None
     start_time: str | None = None
     end_time: str | None = None
-    tag_ids: list[str] | None = None
-    goal_id: str | None = None
+    tag_id: str | None = None
     repeat: dict | None = None
     pushed_to_google: bool | None = None
 
@@ -68,11 +64,9 @@ class BlockUpdateRequest(BaseModel):
 class TagCreateRequest(BaseModel):
     id: str
     label: str
-    color: str
 
 
-class GoalCreateRequest(BaseModel):
-    id: str
+class TagUpdateRequest(BaseModel):
     label: str
 
 
@@ -118,6 +112,12 @@ def create_tag_route(req: TagCreateRequest):
     return create_tag(req.model_dump())
 
 
-@router.post("/goals")
-def create_goal_route(req: GoalCreateRequest):
-    return create_goal(req.model_dump())
+@router.patch("/tags/{tag_id}")
+def update_tag_route(tag_id: str, req: TagUpdateRequest):
+    return update_tag(tag_id, req.model_dump(exclude_unset=True))
+
+
+@router.delete("/tags/{tag_id}")
+def delete_tag_route(tag_id: str):
+    delete_tag(tag_id)
+    return {"ok": True}

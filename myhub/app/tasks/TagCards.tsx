@@ -2,26 +2,26 @@
 
 import { useState } from "react";
 import type { CSSProperties } from "react";
-import type { Goal, Task } from "./types";
-import { getGoalColor } from "./constants";
-import styles from "./GoalCards.module.css";
+import type { Tag, Task } from "./types";
+import { getTagColor } from "./constants";
+import styles from "./TagCards.module.css";
 
-export default function GoalCards({
-  goals,
+export default function TagCards({
+  tags,
   tasks,
-  onOpenGoal,
-  onCreateGoal,
+  onOpenTag,
+  onCreateTag,
 }: {
-  goals: Goal[];
+  tags: Tag[];
   tasks: Task[];
-  onOpenGoal: (goalId: string) => void;
-  onCreateGoal: (goal: Goal) => void;
+  onOpenTag: (tagId: string) => void;
+  onCreateTag: (tag: Tag) => void;
 }) {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
 
-  const completedCount = (goalId: string): number =>
-    tasks.filter((t) => t.goalId === goalId && t.completedDates.length > 0).length;
+  const completedCount = (tagId: string): number =>
+    tasks.filter((t) => t.tagId === tagId && t.completedDates.length > 0).length;
 
   const handleAdd = () => {
     const trimmed = label.trim();
@@ -29,25 +29,25 @@ export default function GoalCards({
       setAdding(false);
       return;
     }
-    onCreateGoal({ id: crypto.randomUUID(), label: trimmed, createdAt: new Date().toISOString() });
+    onCreateTag({ id: crypto.randomUUID(), label: trimmed, createdAt: new Date().toISOString() });
     setLabel("");
     setAdding(false);
   };
 
   return (
     <div className={styles.row}>
-      {goals.map((goal, index) => {
-        const color = getGoalColor(index);
+      {tags.map((tag, index) => {
+        const color = getTagColor(index);
         return (
           <button
-            key={goal.id}
+            key={tag.id}
             type="button"
             className={styles.card}
             style={{ "--accent": color } as CSSProperties}
-            onClick={() => onOpenGoal(goal.id)}
+            onClick={() => onOpenTag(tag.id)}
           >
-            <span className={styles.label}>{goal.label}</span>
-            <span className={styles.count}>{completedCount(goal.id)}</span>
+            <span className={styles.label}>{tag.label}</span>
+            <span className={styles.count}>{completedCount(tag.id)}</span>
           </button>
         );
       })}
@@ -57,7 +57,7 @@ export default function GoalCards({
           <input
             type="text"
             className={styles.addInput}
-            placeholder="Goal name"
+            placeholder="Tag name"
             value={label}
             autoFocus
             onChange={(e) => setLabel(e.target.value)}
@@ -70,7 +70,7 @@ export default function GoalCards({
         </div>
       ) : (
         <button type="button" className={styles.addCard} onClick={() => setAdding(true)}>
-          + Add goal
+          + Add tag
         </button>
       )}
     </div>

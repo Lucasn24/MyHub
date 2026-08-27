@@ -61,12 +61,11 @@ All three endpoints are independent — calling any of them first (with an `id`)
 
 ### Planner (Tasks page)
 
-Plain CRUD over the `planner_goals`/`planner_tags`/`planner_tasks`/`planner_blocks` tables — no LLM involved. Snake_case field names match the Postgres columns exactly; the frontend maps them to/from its camelCase `Task`/`ScheduleBlock`/`Tag`/`Goal` types in `app/tasks/serialization.ts`.
+Plain CRUD over the `planner_tags`/`planner_tasks`/`planner_blocks` tables — no LLM involved. Snake_case field names match the Postgres columns exactly; the frontend maps them to/from its camelCase `Task`/`ScheduleBlock`/`Tag` types in `app/tasks/serialization.ts`. `planner_tags` is the single categorization/goal-tracking entity — tasks and events (blocks) each optionally reference one via `tag_id`.
 
-- `GET /planner/state` — returns `{"tasks": [...], "blocks": [...], "tags": [...], "goals": [...]}` in one call.
-- `POST/PATCH/DELETE /planner/tasks[/{id}]`, same shape for `/planner/blocks`.
-- `POST /planner/tags`, `POST /planner/goals` — create-only, matching what the Tasks page UI supports.
+- `GET /planner/state` — returns `{"tasks": [...], "blocks": [...], "tags": [...]}` in one call.
+- `POST/PATCH/DELETE /planner/tasks[/{id}]`, same shape for `/planner/blocks` and `/planner/tags`.
 - Create requests take a client-supplied `id` (the frontend already generates one with `crypto.randomUUID()` for optimistic UI) rather than a server-generated one.
-- Deleting a task cascades its blocks at the DB level (`planner_blocks.task_id` is `on delete cascade`) — no separate cleanup call needed.
+- Tasks are never scheduled on the timetable themselves — `planner_tasks.event_id` optionally links a task to an existing event (`planner_blocks` row) for organization only. Deleting that event clears the link (`on delete set null`); deleting a tag clears `tag_id` on anything tagged with it, same way.
 
 CORS is currently open to `http://localhost:3000` (the Next.js dev server) in `app/main.py` — add your deployed frontend origin there when you deploy.

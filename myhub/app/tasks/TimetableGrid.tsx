@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { Calendar, CalendarCheck, Pencil } from "lucide-react";
 import type { CalendarEvent, ScheduleBlock, Tag } from "./types";
+import { getTagColor } from "./constants";
 import {
   GRID_END_HOUR,
   GRID_START_HOUR,
@@ -14,7 +15,6 @@ import {
   snapMinutes,
   timeToMinutes,
 } from "./time";
-import { TASK_DRAG_MIME } from "./TodoList";
 import styles from "./TimetableGrid.module.css";
 
 const TOTAL_MINUTES = (GRID_END_HOUR - GRID_START_HOUR) * 60;
@@ -58,7 +58,6 @@ export default function TimetableGrid({
   tags,
   calendarEvents,
   onCreateRange,
-  onDropTask,
   onMoveBlock,
   onResizeBlock,
   onDeleteBlock,
@@ -69,7 +68,6 @@ export default function TimetableGrid({
   tags: Tag[];
   calendarEvents: CalendarEvent[];
   onCreateRange: (range: { startTime: string; endTime: string }) => void;
-  onDropTask: (taskId: string, startTime: string) => void;
   onMoveBlock: (blockId: string, startTime: string) => void;
   onResizeBlock: (blockId: string, endTime: string) => void;
   onDeleteBlock: (blockId: string) => void;
@@ -102,9 +100,10 @@ export default function TimetableGrid({
     setDrag(next);
   };
 
-  const tagColor = (tagIds: string[]): string => {
-    const tag = tags.find((t) => tagIds.includes(t.id));
-    return tag?.color ?? "#6b7280";
+  const tagColor = (tagId?: string): string => {
+    if (!tagId) return "#6b7280";
+    const index = tags.findIndex((t) => t.id === tagId);
+    return index === -1 ? "#6b7280" : getTagColor(index);
   };
 
   const clientYToMinutes = (clientY: number): number => {
@@ -193,17 +192,6 @@ export default function TimetableGrid({
     window.addEventListener("mouseup", onUp);
   };
 
-  // ---- drop a to-do dragged in from the list ----
-  const handleDragOver = (e: ReactDragEvent) => {
-    if (e.dataTransfer.types.includes(TASK_DRAG_MIME)) e.preventDefault();
-  };
-  const handleDrop = (e: ReactDragEvent) => {
-    const taskId = e.dataTransfer.getData(TASK_DRAG_MIME);
-    if (!taskId) return;
-    e.preventDefault();
-    onDropTask(taskId, minutesToTime(clientYToMinutes(e.clientY)));
-  };
-
   const hours = Array.from({ length: GRID_END_HOUR - GRID_START_HOUR }, (_, i) => GRID_START_HOUR + i);
 
   return (
@@ -226,8 +214,6 @@ export default function TimetableGrid({
         className={styles.gridBody}
         style={{ height: TOTAL_HEIGHT }}
         onMouseDown={handleGridMouseDown}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
       >
         {hours.map((h) => (
           <div key={h} className={styles.hourLine} style={{ top: minutesToY(h * 60) }} />
@@ -259,7 +245,7 @@ export default function TimetableGrid({
               : timeToMinutes(block.endTime);
           const top = minutesToY(start);
           const height = Math.max(minutesToY(end) - top, PX_PER_SLOT);
-          const color = tagColor(block.tagIds);
+          const color = tagColor(block.tagId);
 
           return (
             <div
@@ -282,18 +268,16 @@ export default function TimetableGrid({
                   >
                     {block.pushedToGoogle ? <CalendarCheck size={13} strokeWidth={2.25} /> : <Calendar size={13} strokeWidth={2.25} />}
                   </button>
-                  {!block.taskId && (
-                    <button
-                      type="button"
-                      className={styles.blockIconButton}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onClick={() => onEditBlock(block.id)}
-                      aria-label={`Edit "${block.title}"`}
-                      title="Edit event"
-                    >
-                      <Pencil size={12} strokeWidth={2.25} />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className={styles.blockIconButton}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={() => onEditBlock(block.id)}
+                    aria-label={`Edit "${block.title}"`}
+                    title="Edit event"
+                  >
+                    <Pencil size={12} strokeWidth={2.25} />
+                  </button>
                   <button
                     type="button"
                     className={styles.blockDelete}

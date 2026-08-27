@@ -1,44 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import type { Goal, ScheduleBlock, Task } from "./types";
-import { GOAL_OTHER_COLOR, getGoalColor } from "./constants";
+import type { ScheduleBlock, Tag } from "./types";
+import { TAG_OTHER_COLOR, getTagColor } from "./constants";
 import { getWeekRange, isDateInRange, timeToMinutes } from "./time";
 import styles from "./HoursChart.module.css";
 
 const MAX_SLICES = 6;
 
-type GoalHours = { goalId: string; label: string; hours: number; color: string };
+type TagHours = { tagId: string; label: string; hours: number; color: string };
 
-function computeGoalHours(
-  scope: "day" | "week",
-  todayISO: string,
-  goals: Goal[],
-  tasks: Task[],
-  blocks: ScheduleBlock[]
-): GoalHours[] {
+function computeTagHours(scope: "day" | "week", todayISO: string, tags: Tag[], blocks: ScheduleBlock[]): TagHours[] {
   const range = scope === "day" ? { start: todayISO, end: todayISO } : getWeekRange(todayISO);
-  const totalsByGoalId = new Map<string, number>();
+  const totalsByTagId = new Map<string, number>();
 
   for (const block of blocks) {
-    if (!isDateInRange(block.date, range)) continue;
+    if (!block.tagId || !isDateInRange(block.date, range)) continue;
     const hours = (timeToMinutes(block.endTime) - timeToMinutes(block.startTime)) / 60;
-
-    if (block.taskId) {
-      const task = tasks.find((t) => t.id === block.taskId);
-      if (!task?.goalId || !task.completedDates.includes(block.date)) continue;
-      totalsByGoalId.set(task.goalId, (totalsByGoalId.get(task.goalId) ?? 0) + hours);
-    } else if (block.goalId) {
-      totalsByGoalId.set(block.goalId, (totalsByGoalId.get(block.goalId) ?? 0) + hours);
-    }
+    totalsByTagId.set(block.tagId, (totalsByTagId.get(block.tagId) ?? 0) + hours);
   }
 
-  const entries = goals
-    .map((goal, index) => ({
-      goalId: goal.id,
-      label: goal.label,
-      hours: totalsByGoalId.get(goal.id) ?? 0,
-      color: getGoalColor(index),
+  const entries = tags
+    .map((tag, index) => ({
+      tagId: tag.id,
+      label: tag.label,
+      hours: totalsByTagId.get(tag.id) ?? 0,
+      color: getTagColor(index),
     }))
     .filter((e) => e.hours > 0)
     .sort((a, b) => b.hours - a.hours);
@@ -47,14 +34,14 @@ function computeGoalHours(
 
   const head = entries.slice(0, MAX_SLICES);
   const tailHours = entries.slice(MAX_SLICES).reduce((sum, e) => sum + e.hours, 0);
-  return [...head, { goalId: "__other__", label: "Other", hours: tailHours, color: GOAL_OTHER_COLOR }];
+  return [...head, { tagId: "__other__", label: "Other", hours: tailHours, color: TAG_OTHER_COLOR }];
 }
 
-type DonutSegment = GoalHours & { dasharray: string; dashoffset: number };
+type DonutSegment = TagHours & { dasharray: string; dashoffset: number };
 
 // Plain helper (outside component render) so the running `cumulative` mutation
 // doesn't trip the no-mutation-during-render lint rule.
-function buildDonutSegments(entries: GoalHours[], total: number, circumference: number, gap: number): DonutSegment[] {
+function buildDonutSegments(entries: TagHours[], total: number, circumference: number, gap: number): DonutSegment[] {
   let cumulative = 0;
   return entries.map((e) => {
     const fraction = total > 0 ? e.hours / total : 0;
@@ -65,7 +52,7 @@ function buildDonutSegments(entries: GoalHours[], total: number, circumference: 
   });
 }
 
-function Donut({ entries, total }: { entries: GoalHours[]; total: number }) {
+function Donut({ entries, total }: { entries: TagHours[]; total: number }) {
   const size = 108;
   const strokeWidth = 16;
   const r = (size - strokeWidth) / 2;
@@ -77,7 +64,7 @@ function Donut({ entries, total }: { entries: GoalHours[]; total: number }) {
       <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
         {segments.map((s) => (
           <circle
-            key={s.goalId}
+            key={s.tagId}
             cx={size / 2}
             cy={size / 2}
             r={r}
@@ -100,18 +87,16 @@ function Donut({ entries, total }: { entries: GoalHours[]; total: number }) {
 }
 
 export default function HoursChart({
-  goals,
-  tasks,
+  tags,
   blocks,
   todayISO,
 }: {
-  goals: Goal[];
-  tasks: Task[];
+  tags: Tag[];
   blocks: ScheduleBlock[];
   todayISO: string;
 }) {
   const [scope, setScope] = useState<"day" | "week">("day");
-  const entries = computeGoalHours(scope, todayISO, goals, tasks, blocks);
+  const entries = computeTagHours(scope, todayISO, tags, blocks);
   const total = entries.reduce((sum, e) => sum + e.hours, 0);
   const maxHours = Math.max(...entries.map((e) => e.hours), 0.001);
 
@@ -135,12 +120,12 @@ export default function HoursChart({
       </div>
 
       {entries.length === 0 ? (
-        <p className={styles.empty}>No completed, scheduled hours logged toward a goal yet.</p>
+        <p className={styles.empty}>No scheduled hours logged toward a tag yet.</p>
       ) : (
         <div className={styles.body}>
           <div className={styles.barList}>
             {entries.map((e) => (
-              <div key={e.goalId} className={styles.barRow} tabIndex={0}>
+              <div key={e.tagId} className={styles.barRow} tabIndex={0}>
                 <span className={styles.barLabel} title={e.label}>
                   {e.label}
                 </span>
@@ -159,7 +144,7 @@ export default function HoursChart({
             <Donut entries={entries} total={total} />
             <ul className={styles.legend}>
               {entries.map((e) => (
-                <li key={e.goalId} className={styles.legendRow}>
+                <li key={e.tagId} className={styles.legendRow}>
                   <span className={styles.swatch} style={{ backgroundColor: e.color }} />
                   <span className={styles.legendLabel}>{e.label}</span>
                   <span className={styles.legendValue}>{Math.round((e.hours / total) * 100)}%</span>

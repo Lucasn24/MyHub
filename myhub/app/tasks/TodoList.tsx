@@ -2,37 +2,33 @@
 
 import { useState } from "react";
 import type { CSSProperties } from "react";
-import type { Goal, Task, Tag, Urgency } from "./types";
+import type { ScheduleBlock, Tag, Task, Urgency } from "./types";
 import { URGENCY_COLOR, URGENCY_LABEL, URGENCY_ORDER, getUrgency } from "./urgency";
-import { getGoalColor } from "./constants";
+import { getTagColor } from "./constants";
 import { formatTimeLabel } from "./time";
 import styles from "./TodoList.module.css";
-
-export const TASK_DRAG_MIME = "application/x-myhub-task-id";
 
 const FILTERABLE: Urgency[] = ["overdue", "dueToday", "dueSoon", "upcoming"];
 
 export default function TodoList({
   tasks,
   tags,
-  goals,
+  blocks,
   todayISO,
   onToggleComplete,
   onDelete,
-  onQuickSchedule,
 }: {
   tasks: Task[];
   tags: Tag[];
-  goals: Goal[];
+  blocks: ScheduleBlock[];
   todayISO: string;
   onToggleComplete: (taskId: string) => void;
   onDelete: (taskId: string) => void;
-  onQuickSchedule: (task: Task) => void;
 }) {
   const [filter, setFilter] = useState<Urgency | "all">("all");
 
-  const tagById = new Map(tags.map((t) => [t.id, t]));
-  const goalIndexById = new Map(goals.map((g, i) => [g.id, i]));
+  const tagIndexById = new Map(tags.map((t, i) => [t.id, i]));
+  const blockById = new Map(blocks.map((b) => [b.id, b]));
 
   const active = tasks.filter((t) => !t.completedDates.includes(todayISO));
   const completedToday = tasks.filter((t) => t.completedDates.includes(todayISO));
@@ -83,18 +79,10 @@ export default function TodoList({
 
         {sorted.map((task) => {
           const urgency = getUrgency(task);
-          const goal = goals.find((g) => g.id === task.goalId);
+          const tag = tags.find((t) => t.id === task.tagId);
+          const event = task.eventId ? blockById.get(task.eventId) : undefined;
           return (
-            <div
-              key={task.id}
-              className={styles.item}
-              style={{ borderLeftColor: URGENCY_COLOR[urgency] }}
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData(TASK_DRAG_MIME, task.id);
-                e.dataTransfer.effectAllowed = "copy";
-              }}
-            >
+            <div key={task.id} className={styles.item} style={{ borderLeftColor: URGENCY_COLOR[urgency] }}>
               <input
                 type="checkbox"
                 className={styles.checkbox}
@@ -105,7 +93,6 @@ export default function TodoList({
               <div className={styles.main}>
                 <div className={styles.topLine}>
                   <span className={styles.title}>{task.title}</span>
-                  {task.repeat && <span className={styles.repeatBadge}>repeats</span>}
                 </div>
                 <div className={styles.metaLine}>
                   {task.dueDate && (
@@ -114,36 +101,19 @@ export default function TodoList({
                       {task.dueTime ? ` · ${formatTimeLabel(task.dueTime)}` : ""}
                     </span>
                   )}
-                  {goal && (
+                  {tag && (
                     <span className={styles.tagChip}>
                       <span
                         className={styles.tagDot}
-                        style={{ backgroundColor: getGoalColor(goalIndexById.get(goal.id) ?? 0) }}
+                        style={{ backgroundColor: getTagColor(tagIndexById.get(tag.id) ?? 0) }}
                       />
-                      {goal.label}
+                      {tag.label}
                     </span>
                   )}
-                  {task.tagIds.map((id) => {
-                    const tag = tagById.get(id);
-                    if (!tag) return null;
-                    return (
-                      <span key={id} className={styles.tagChip}>
-                        <span className={styles.tagDot} style={{ backgroundColor: tag.color }} />
-                        {tag.label}
-                      </span>
-                    );
-                  })}
+                  {event && <span className={styles.tagChip}>📅 {event.title}</span>}
                 </div>
               </div>
               <div className={styles.actions}>
-                <button
-                  type="button"
-                  className={styles.scheduleButton}
-                  onClick={() => onQuickSchedule(task)}
-                  title="Add to today's timetable"
-                >
-                  Schedule
-                </button>
                 <button
                   type="button"
                   className={styles.deleteButton}
