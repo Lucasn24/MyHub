@@ -42,6 +42,32 @@ export type InboxEvent = {
 
 export type InboxAttachment = { filename: string; size: number };
 
+export type ExpenseType =
+  | "groceries"
+  | "dining"
+  | "transport"
+  | "travel"
+  | "shopping"
+  | "subscription"
+  | "utilities"
+  | "entertainment"
+  | "health"
+  | "housing"
+  | "other";
+
+export type EmbeddedExpense = {
+  id: string;
+  gmail_message_id: string;
+  title: string;
+  type: ExpenseType;
+  cost: number;
+  date: string;
+};
+
+export type InboxExpense = EmbeddedExpense & {
+  emails: { subject: string; sender: string } | null;
+};
+
 export type InboxEmail = {
   id: string;
   gmail_message_id: string;
@@ -55,11 +81,17 @@ export type InboxEmail = {
   category: string | null;
   tasks: InboxTask[];
   events: InboxEvent[];
+  expenses: EmbeddedExpense[];
 };
 
 export async function getInboxEmails(limit = 100): Promise<InboxEmail[]> {
   const { emails } = await request<{ emails: InboxEmail[] }>(`/email/inbox?limit=${limit}`);
   return emails;
+}
+
+export async function getExpenses(limit = 200): Promise<InboxExpense[]> {
+  const { expenses } = await request<{ expenses: InboxExpense[] }>(`/email/expenses?limit=${limit}`);
+  return expenses;
 }
 
 export async function getKnownMessageIds(): Promise<Set<string>> {

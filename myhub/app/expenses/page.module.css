@@ -1,3 +1,350 @@
-.page {
-  padding: 2rem;
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  border-radius: 1.75rem;
+  background-color: #f7f7f7;
+  padding: 2rem 2.25rem;
+}
+
+/* top bar */
+
+.topBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.statusBadge {
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #333;
+}
+
+.heading {
+  margin: 0.75rem 0 0;
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #111;
+}
+
+.syncButton {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.syncButton:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.connectPrompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.connectText {
+  font-size: 0.82rem;
+  color: #6f6f6b;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #8a8a86;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: #111;
+}
+
+/* period / chart-mode toggles */
+
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.toggleGroup {
+  display: inline-flex;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  background-color: #f2f1ec;
+  padding: 0.3rem;
+}
+
+.toggleButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  border-radius: 9999px;
+  background-color: transparent;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6f6f6b;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.toggleButton:hover {
+  color: #111;
+}
+
+.toggleButtonActive,
+.toggleButtonActive:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* expense-type cards */
+
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.85rem;
+}
+
+.typeCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+  padding: 1.1rem;
+  text-decoration: none;
+  overflow: hidden;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.typeCard:hover {
+  background-color: #ebeae3;
+  transform: translateY(-1px);
+}
+
+.typeCardSwatch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+}
+
+.typeCardEmpty {
+  background-color: #f7f7f7;
+  border: 1px dashed rgba(0, 0, 0, 0.12);
+}
+
+.typeCardEmpty:hover {
+  background-color: #f2f1ec;
+}
+
+.typeCardEmpty .typeCardSwatch {
+  opacity: 0.3;
+}
+
+.typeCardEmpty .cardValue {
+  color: #b3b3ae;
+}
+
+/* chart */
+
+.chartCard {
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+  padding: 1.1rem 0.5rem 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* section header, shared by both columns */
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #111;
+}
+
+.runningCount {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #111;
+}
+
+/* content grid */
+
+.content {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* expense list */
+
+.expenseList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+  overflow: hidden;
+}
+
+.expenseItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.expenseItem:last-child {
+  border-bottom: none;
+}
+
+.expenseMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.expenseTopLine {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.expenseTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.expenseDate {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: #8a8a86;
+}
+
+.expenseSource {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6f6f6b;
+}
+
+.expenseRowActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.expenseCost {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.gmailLink {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #8a8a86;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.gmailLink:hover {
+  color: #111;
+  text-decoration: underline;
+}
+
+.listEmpty {
+  padding: 0.85rem 1.25rem;
+  font-size: 0.8rem;
+  color: #8a8a86;
+}
+
+/* side panel */
+
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.summaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: 1.25rem;
+  background-color: #f2f1ec;
+  padding: 1.25rem;
+}
+
+.cardLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #8a8a86;
+}
+
+.cardValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.cardSub {
+  font-size: 0.75rem;
+  color: #6f6f6b;
 }
