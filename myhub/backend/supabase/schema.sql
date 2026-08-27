@@ -94,3 +94,69 @@ alter table emails enable row level security;
 alter table tasks enable row level security;
 alter table events enable row level security;
 alter table expenses enable row level security;
+
+-- Tasks page (personal planner) tables -- distinct from the email-derived
+-- `tasks`/`events` above, which come from parsing inbox messages, not the
+-- Tasks page UI. Prefixed `planner_` to avoid colliding with those.
+
+create table if not exists planner_goals (
+    id uuid primary key default gen_random_uuid(),
+    label text not null,
+    created_at timestamptz not null default now()
+);
+
+-- text id (not uuid) so the three seeded defaults below can use stable,
+-- human-readable ids; client-created tags still just use crypto.randomUUID().
+create table if not exists planner_tags (
+    id text primary key,
+    label text not null,
+    color text not null,
+    created_at timestamptz not null default now()
+);
+
+insert into planner_tags (id, label, color) values
+    ('work', 'Work', '#3b82f6'),
+    ('personal', 'Personal', '#10b981'),
+    ('urgent', 'Urgent', '#ef4444')
+on conflict (id) do nothing;
+
+create table if not exists planner_tasks (
+    id uuid primary key default gen_random_uuid(),
+    title text not null,
+    notes text,
+    due_date date,
+    due_time text,
+    tag_ids text[] not null default '{}',
+    goal_id uuid references planner_goals(id) on delete set null,
+    -- {freq: "daily"|"weekly", daysOfWeek: number[]|null, endDate: string|null},
+    -- kept as-is from the frontend's RepeatRule type -- no SQL ever reaches inside it.
+    repeat jsonb,
+    completed_dates text[] not null default '{}',
+    created_at timestamptz not null default now()
+);
+
+create index if not exists planner_tasks_goal_id_idx on planner_tasks (goal_id);
+
+create table if not exists planner_blocks (
+    id uuid primary key default gen_random_uuid(),
+    task_id uuid references planner_tasks(id) on delete cascade,
+    title text not null,
+    notes text,
+    date date not null,
+    start_time text not null,
+    end_time text not null,
+    tag_ids text[] not null default '{}',
+    -- events only -- a task-derived block gets its goal from the task itself.
+    goal_id uuid references planner_goals(id) on delete set null,
+    repeat jsonb,
+    pushed_to_google boolean not null default false,
+    created_at timestamptz not null default now()
+);
+
+create index if not exists planner_blocks_task_id_idx on planner_blocks (task_id);
+create index if not exists planner_blocks_date_idx on planner_blocks (date);
+
+alter table planner_goals enable row level security;
+alter table planner_tags enable row level security;
+alter table planner_tasks enable row level security;
+alter table planner_blocks enable row level security;

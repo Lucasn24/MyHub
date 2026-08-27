@@ -146,3 +146,108 @@ export async function processEmail(payload: ProcessEmailPayload): Promise<void> 
     body: JSON.stringify(payload),
   });
 }
+
+// Tasks page (personal planner) -- distinct from the email-derived InboxTask/
+// InboxEvent above, which come from parsing inbox messages, not this page's UI.
+
+export type PlannerRepeatRow = {
+  freq: "daily" | "weekly";
+  daysOfWeek?: number[];
+  endDate?: string;
+};
+
+export type PlannerTaskRow = {
+  id: string;
+  title: string;
+  notes: string | null;
+  due_date: string | null;
+  due_time: string | null;
+  tag_ids: string[];
+  goal_id: string | null;
+  repeat: PlannerRepeatRow | null;
+  completed_dates: string[];
+  created_at: string;
+};
+
+export type PlannerBlockRow = {
+  id: string;
+  task_id: string | null;
+  title: string;
+  notes: string | null;
+  date: string;
+  start_time: string;
+  end_time: string;
+  tag_ids: string[];
+  goal_id: string | null;
+  repeat: PlannerRepeatRow | null;
+  pushed_to_google: boolean;
+  created_at: string;
+};
+
+export type PlannerTagRow = {
+  id: string;
+  label: string;
+  color: string;
+  created_at: string;
+};
+
+export type PlannerGoalRow = {
+  id: string;
+  label: string;
+  created_at: string;
+};
+
+export type PlannerState = {
+  tasks: PlannerTaskRow[];
+  blocks: PlannerBlockRow[];
+  tags: PlannerTagRow[];
+  goals: PlannerGoalRow[];
+};
+
+export async function getPlannerState(): Promise<PlannerState> {
+  return request<PlannerState>("/planner/state");
+}
+
+export async function createPlannerTask(row: Omit<PlannerTaskRow, "created_at">): Promise<PlannerTaskRow> {
+  return request<PlannerTaskRow>("/planner/tasks", { method: "POST", body: JSON.stringify(row) });
+}
+
+export async function updatePlannerTask(
+  id: string,
+  updates: Partial<Omit<PlannerTaskRow, "id" | "created_at">>
+): Promise<PlannerTaskRow> {
+  return request<PlannerTaskRow>(`/planner/tasks/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function deletePlannerTask(id: string): Promise<void> {
+  await request(`/planner/tasks/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+export async function createPlannerBlock(row: Omit<PlannerBlockRow, "created_at">): Promise<PlannerBlockRow> {
+  return request<PlannerBlockRow>("/planner/blocks", { method: "POST", body: JSON.stringify(row) });
+}
+
+export async function updatePlannerBlock(
+  id: string,
+  updates: Partial<Omit<PlannerBlockRow, "id" | "created_at">>
+): Promise<PlannerBlockRow> {
+  return request<PlannerBlockRow>(`/planner/blocks/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function deletePlannerBlock(id: string): Promise<void> {
+  await request(`/planner/blocks/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+export async function createPlannerTag(row: Omit<PlannerTagRow, "created_at">): Promise<PlannerTagRow> {
+  return request<PlannerTagRow>("/planner/tags", { method: "POST", body: JSON.stringify(row) });
+}
+
+export async function createPlannerGoal(row: Omit<PlannerGoalRow, "created_at">): Promise<PlannerGoalRow> {
+  return request<PlannerGoalRow>("/planner/goals", { method: "POST", body: JSON.stringify(row) });
+}

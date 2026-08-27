@@ -1,11 +1,3 @@
-import type { Tag } from "./types";
-
-export const DEFAULT_TAGS: Tag[] = [
-  { id: "work", label: "Work", color: "#3b82f6" },
-  { id: "personal", label: "Personal", color: "#10b981" },
-  { id: "urgent", label: "Urgent", color: "#ef4444" },
-];
-
 export const TAG_COLOR_PRESETS = [
   "#3b82f6", // blue
   "#10b981", // green

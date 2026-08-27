@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
 import { Calendar, CalendarCheck, Pencil } from "lucide-react";
-import type { MockCalendarEvent, ScheduleBlock, Tag } from "./types";
+import type { CalendarEvent, ScheduleBlock, Tag } from "./types";
 import {
   GRID_END_HOUR,
   GRID_START_HOUR,
@@ -35,10 +35,28 @@ type DragState =
   | { kind: "move"; blockId: string; duration: number; liveStart: number }
   | { kind: "resize"; blockId: string; liveEnd: number };
 
+function nowToMinutes(): number {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+// Minutes-since-midnight for "now", refreshed every 30s so the current-time
+// line drifts smoothly rather than jumping once a minute.
+function useNowMinutes(): number {
+  const [nowMinutes, setNowMinutes] = useState(nowToMinutes);
+
+  useEffect(() => {
+    const id = setInterval(() => setNowMinutes(nowToMinutes()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  return nowMinutes;
+}
+
 export default function TimetableGrid({
   blocks,
   tags,
-  mockEvents,
+  calendarEvents,
   onCreateRange,
   onDropTask,
   onMoveBlock,
@@ -49,7 +67,7 @@ export default function TimetableGrid({
 }: {
   blocks: ScheduleBlock[];
   tags: Tag[];
-  mockEvents: MockCalendarEvent[];
+  calendarEvents: CalendarEvent[];
   onCreateRange: (range: { startTime: string; endTime: string }) => void;
   onDropTask: (taskId: string, startTime: string) => void;
   onMoveBlock: (blockId: string, startTime: string) => void;
@@ -58,9 +76,23 @@ export default function TimetableGrid({
   onPushToGoogle: (blockId: string) => void;
   onEditBlock: (blockId: string) => void;
 }) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
   const dragRef = useRef<DragState | null>(null);
+  const nowMinutes = useNowMinutes();
+  const showNowLine = nowMinutes >= GRID_START_HOUR * 60 && nowMinutes <= GRID_END_HOUR * 60;
+
+  // Center the current-time line in the viewport once, on first load only —
+  // a ref guard keeps later nowMinutes ticks from fighting the user's scroll.
+  const hasCenteredRef = useRef(false);
+  useEffect(() => {
+    if (hasCenteredRef.current) return;
+    const container = scrollRef.current;
+    if (!container || !showNowLine) return;
+    hasCenteredRef.current = true;
+    container.scrollTop = Math.max(0, minutesToY(nowMinutes) - container.clientHeight / 2);
+  }, [showNowLine, nowMinutes]);
 
   // Mirrors `drag` into a ref so mouseup handlers can read the latest live
   // value synchronously without calling a parent setState from inside a
@@ -175,13 +207,18 @@ export default function TimetableGrid({
   const hours = Array.from({ length: GRID_END_HOUR - GRID_START_HOUR }, (_, i) => GRID_START_HOUR + i);
 
   return (
-    <div className={styles.scroll}>
+    <div className={styles.scroll} ref={scrollRef}>
       <div className={styles.gutter} style={{ height: TOTAL_HEIGHT }}>
         {hours.map((h) => (
           <div key={h} className={styles.hourLabel} style={{ top: minutesToY(h * 60) }}>
             {formatTimeLabel(`${String(h).padStart(2, "0")}:00`)}
           </div>
         ))}
+        {showNowLine && (
+          <div className={styles.nowLabel} style={{ top: minutesToY(nowMinutes) }}>
+            {formatTimeLabel(minutesToTime(nowMinutes))}
+          </div>
+        )}
       </div>
 
       <div
@@ -196,7 +233,7 @@ export default function TimetableGrid({
           <div key={h} className={styles.hourLine} style={{ top: minutesToY(h * 60) }} />
         ))}
 
-        {mockEvents.map((ev) => {
+        {calendarEvents.map((ev) => {
           const top = minutesToY(timeToMinutes(ev.startTime));
           const height = Math.max(minutesToY(timeToMinutes(ev.endTime)) - top, PX_PER_SLOT);
           return (
@@ -205,6 +242,7 @@ export default function TimetableGrid({
               <span className={styles.blockTitle}>{ev.title}</span>
               <span className={styles.blockTime}>
                 {formatTimeLabel(ev.startTime)} – {formatTimeLabel(ev.endTime)}
+                {ev.location ? ` · ${ev.location}` : ""}
               </span>
             </div>
           );
@@ -283,6 +321,12 @@ export default function TimetableGrid({
             const height = Math.max(minutesToY(end) - top, PX_PER_SLOT);
             return <div className={styles.draftBlock} style={{ top, height }} />;
           })()}
+
+        {showNowLine && (
+          <div className={styles.nowLine} style={{ top: minutesToY(nowMinutes) }}>
+            <span className={styles.nowDot} />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import email
+from app.api import email, planner
 
 app = FastAPI(title="langgraph-agent")
 
@@ -14,6 +14,7 @@ app.add_middleware(
 )
 
 app.include_router(email.router)
+app.include_router(planner.router)
 
 
 @app.get("/health")

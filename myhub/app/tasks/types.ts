@@ -45,11 +45,11 @@ export type ScheduleBlock = {
   pushedToGoogle: boolean;
 };
 
-export type MockCalendarEvent = {
+export type CalendarEvent = {
   id: string;
   title: string;
-  startTime: string;
-  endTime: string;
+  startTime: string; // "HH:mm"
+  endTime: string; // "HH:mm"
   location?: string;
 };
 
