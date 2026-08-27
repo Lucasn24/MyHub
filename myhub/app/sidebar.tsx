@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Mail, DollarSign, Settings } from "lucide-react";
+import { LayoutGrid, Mail, DollarSign, ListTodo, Settings } from "lucide-react";
 import styles from "./sidebar.module.css";
 
 const navItems = [
   { href: "/", label: "Overview", icon: LayoutGrid },
   { href: "/emails", label: "Emails", icon: Mail },
+  { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/expenses", label: "Expenses", icon: DollarSign },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

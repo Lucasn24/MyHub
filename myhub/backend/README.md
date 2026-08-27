@@ -24,7 +24,13 @@ supabase/
 ```
 cd myhub/backend
 python -m venv .venv
+
+# macOS/Linux
+source .venv/bin/activate
+
+# Windows
 .venv\Scripts\activate
+
 pip install -r requirements.txt
 ```
 
@@ -35,6 +41,10 @@ Before using any endpoint that persists data, paste `supabase/schema.sql` into t
 ## Run the API
 
 ```
+# macOS/Linux
+.venv/bin/uvicorn app.main:app --reload --port 8000
+
+# Windows
 .venv\Scripts\uvicorn app.main:app --reload --port 8000
 ```
 

@@ -1,0 +1,170 @@
+.scroll {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 1.25rem;
+  background-color: #ffffff;
+}
+
+.gutter {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.75rem;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.hourLabel {
+  position: absolute;
+  left: 0;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  text-align: right;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #8a8a86;
+}
+
+.gridBody {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  cursor: crosshair;
+  user-select: none;
+}
+
+.hourLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.calendarEvent {
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  border: 1px dashed rgba(0, 0, 0, 0.25);
+  border-radius: 0.6rem;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.03),
+    rgba(0, 0, 0, 0.03) 6px,
+    rgba(0, 0, 0, 0.06) 6px,
+    rgba(0, 0, 0, 0.06) 12px
+  );
+  padding: 0.25rem 0.5rem;
+  overflow: hidden;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.calendarEventLabel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a8a86;
+}
+
+.block {
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  border: 1.5px solid;
+  border-radius: 0.6rem;
+  padding: 0.3rem 0.55rem;
+  overflow: hidden;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.block:active {
+  cursor: grabbing;
+}
+
+.blockHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.blockTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.2;
+}
+
+.blockTime {
+  font-size: 0.68rem;
+  color: #555;
+}
+
+.blockDelete {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.15rem;
+}
+
+.blockDelete:hover {
+  color: #d6453f;
+}
+
+.pushButton {
+  align-self: flex-start;
+  margin-top: 0.15rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+}
+
+.pushButton:hover:not(:disabled) {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.pushButtonDone {
+  cursor: default;
+  color: #4f8a5b;
+  border-color: #4f8a5b;
+}
+
+.resizeHandle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+  cursor: ns-resize;
+}
+
+.draftBlock {
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  z-index: 3;
+  border: 1.5px dashed #111;
+  border-radius: 0.6rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+}
