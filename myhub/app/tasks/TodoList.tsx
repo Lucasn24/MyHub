@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { CSSProperties } from "react";
 import type { ScheduleBlock, Tag, Task, Urgency } from "./types";
 import { URGENCY_COLOR, URGENCY_LABEL, URGENCY_ORDER, getUrgency } from "./urgency";
 import { getTagColor } from "./constants";
 import { formatTimeLabel } from "./time";
 import styles from "./TodoList.module.css";
 
-const FILTERABLE: Urgency[] = ["overdue", "dueToday", "dueSoon", "upcoming"];
+const FILTERABLE: Urgency[] = ["overdue", "dueToday", "dueSoon", "upcoming", "none"];
 
 export default function TodoList({
   tasks,
@@ -17,6 +16,7 @@ export default function TodoList({
   todayISO,
   onToggleComplete,
   onDelete,
+  onSchedule,
 }: {
   tasks: Task[];
   tags: Tag[];
@@ -24,8 +24,10 @@ export default function TodoList({
   todayISO: string;
   onToggleComplete: (taskId: string) => void;
   onDelete: (taskId: string) => void;
+  onSchedule: (taskId: string) => void;
 }) {
-  const [filter, setFilter] = useState<Urgency | "all">("all");
+  const [dueFilter, setDueFilter] = useState<Urgency | "all">("all");
+  const [tagFilter, setTagFilter] = useState<string | "all">("all");
 
   const tagIndexById = new Map(tags.map((t, i) => [t.id, i]));
   const blockById = new Map(blocks.map((b) => [b.id, b]));
@@ -33,12 +35,16 @@ export default function TodoList({
   const active = tasks.filter((t) => !t.completedDates.includes(todayISO));
   const completedToday = tasks.filter((t) => t.completedDates.includes(todayISO));
 
-  const counts = FILTERABLE.reduce<Record<string, number>>((acc, level) => {
+  const dueCounts = FILTERABLE.reduce<Record<string, number>>((acc, level) => {
     acc[level] = active.filter((t) => getUrgency(t) === level).length;
     return acc;
   }, {});
 
-  const visibleActive = filter === "all" ? active : active.filter((t) => getUrgency(t) === filter);
+  const tagCounts = new Map(tags.map((t) => [t.id, active.filter((task) => task.tagId === t.id).length]));
+
+  const visibleActive = active
+    .filter((t) => dueFilter === "all" || getUrgency(t) === dueFilter)
+    .filter((t) => tagFilter === "all" || t.tagId === tagFilter);
 
   const sorted = [...visibleActive].sort((a, b) => {
     const rankA = URGENCY_ORDER.indexOf(getUrgency(a));
@@ -47,33 +53,44 @@ export default function TodoList({
     return (a.dueTime ?? "99:99").localeCompare(b.dueTime ?? "99:99");
   });
 
+  const isFiltered = dueFilter !== "all" || tagFilter !== "all";
+
   return (
     <div className={styles.wrap}>
       <div className={styles.filterRow}>
-        <button
-          type="button"
-          className={`${styles.filterPill} ${filter === "all" ? styles.filterPillActive : ""}`}
-          onClick={() => setFilter("all")}
+        <select
+          className={styles.filterSelect}
+          value={dueFilter}
+          onChange={(e) => setDueFilter(e.target.value as Urgency | "all")}
+          aria-label="Filter by due date"
         >
-          All · {active.length}
-        </button>
-        {FILTERABLE.map((level) => (
-          <button
-            key={level}
-            type="button"
-            className={`${styles.filterPill} ${filter === level ? styles.filterPillActive : ""}`}
-            style={{ "--accent": URGENCY_COLOR[level] } as CSSProperties}
-            onClick={() => setFilter((prev) => (prev === level ? "all" : level))}
-          >
-            {URGENCY_LABEL[level]} · {counts[level]}
-          </button>
-        ))}
+          <option value="all">Due date · All ({active.length})</option>
+          {FILTERABLE.map((level) => (
+            <option key={level} value={level}>
+              {URGENCY_LABEL[level]} ({dueCounts[level]})
+            </option>
+          ))}
+        </select>
+
+        <select
+          className={styles.filterSelect}
+          value={tagFilter}
+          onChange={(e) => setTagFilter(e.target.value)}
+          aria-label="Filter by tag"
+        >
+          <option value="all">Tag · All</option>
+          {tags.map((tag) => (
+            <option key={tag.id} value={tag.id}>
+              {tag.label} ({tagCounts.get(tag.id) ?? 0})
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className={styles.list}>
         {sorted.length === 0 && (
           <p className={styles.empty}>
-            {filter !== "all" ? "Nothing at this urgency level." : "Nothing on your list — add a task."}
+            {isFiltered ? "Nothing matches these filters." : "Nothing on your list — add a task."}
           </p>
         )}
 
@@ -114,6 +131,16 @@ export default function TodoList({
                 </div>
               </div>
               <div className={styles.actions}>
+                {!event && (
+                  <button
+                    type="button"
+                    className={styles.scheduleButton}
+                    onClick={() => onSchedule(task.id)}
+                    title="Schedule an event for this task"
+                  >
+                    Schedule
+                  </button>
+                )}
                 <button
                   type="button"
                   className={styles.deleteButton}

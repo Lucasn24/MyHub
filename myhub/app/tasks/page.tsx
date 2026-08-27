@@ -51,14 +51,31 @@ async function loadCalendarEvents(dateISO: string): Promise<CalendarEvent[]> {
   }
 }
 
-export default async function TasksPage() {
-  const todayISO = toISODate(new Date());
-  const [{ tasks, blocks, tags }, calendarEvents] = await Promise.all([
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+export default async function TasksPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
+  const { date } = await searchParams;
+  const selectedDate = date && ISO_DATE_RE.test(date) ? date : toISODate(new Date());
+
+  const [{ tasks, blocks, tags }, calendarEventsRaw] = await Promise.all([
     loadPlannerState(),
-    loadCalendarEvents(todayISO),
+    loadCalendarEvents(selectedDate),
   ]);
 
+  // Blocks pushed to Google Calendar come back through the sync above too --
+  // skip re-rendering them a second time as a plain read-only overlay.
+  const pushedGoogleEventIds = new Set(
+    blocks.filter((b) => b.date === selectedDate && b.googleEventId).map((b) => b.googleEventId)
+  );
+  const calendarEvents = calendarEventsRaw.filter((ev) => !pushedGoogleEventIds.has(ev.id));
+
   return (
-    <TasksBoard initialTasks={tasks} initialBlocks={blocks} initialTags={tags} calendarEvents={calendarEvents} />
+    <TasksBoard
+      initialTasks={tasks}
+      initialBlocks={blocks}
+      initialTags={tags}
+      calendarEvents={calendarEvents}
+      selectedDate={selectedDate}
+    />
   );
 }

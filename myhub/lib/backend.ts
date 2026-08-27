@@ -151,7 +151,7 @@ export async function processEmail(payload: ProcessEmailPayload): Promise<void> 
 // InboxEvent above, which come from parsing inbox messages, not this page's UI.
 
 export type PlannerRepeatRow = {
-  freq: "daily" | "weekly";
+  freq: "daily" | "custom";
   daysOfWeek?: number[];
   endDate?: string;
 };
@@ -178,6 +178,7 @@ export type PlannerBlockRow = {
   tag_id: string | null;
   repeat: PlannerRepeatRow | null;
   pushed_to_google: boolean;
+  google_event_id: string | null;
   created_at: string;
 };
 

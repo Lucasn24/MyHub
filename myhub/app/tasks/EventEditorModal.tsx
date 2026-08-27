@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { RepeatFreq, RepeatRule, ScheduleBlock, Tag } from "./types";
+import type { RepeatFreq, RepeatRule, ScheduleBlock, Tag, Task } from "./types";
 import { DURATION_OPTIONS_MINUTES, getTagColor } from "./constants";
 import { WEEKDAY_LABELS } from "./occurrences";
 import { minutesToTime, timeToMinutes } from "./time";
@@ -11,19 +11,30 @@ import styles from "./TaskCreatorModal.module.css";
 export default function EventEditorModal({
   block,
   tags,
+  tasks,
   onClose,
   onCreateTag,
   onSave,
+  onLinkTasks,
 }: {
   block: ScheduleBlock;
   tags: Tag[];
+  tasks: Task[];
   onClose: () => void;
   onCreateTag: (tag: Tag) => void;
   onSave: (blockId: string, updates: Partial<ScheduleBlock>) => void;
+  onLinkTasks: (eventId: string, taskIds: string[]) => void;
 }) {
+  // Tasks that could reasonably be linked here -- already-linked tasks belong
+  // to whichever event they're linked to, except this event's own links.
+  const linkableTasks = tasks.filter((t) => !t.eventId || t.eventId === block.id);
+
   const [title, setTitle] = useState(block.title);
   const [notes, setNotes] = useState(block.notes ?? "");
   const [selectedTagId, setSelectedTagId] = useState<string | null>(block.tagId ?? null);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>(
+    tasks.filter((t) => t.eventId === block.id).map((t) => t.id)
+  );
   const [newTagLabel, setNewTagLabel] = useState("");
   const [showTagForm, setShowTagForm] = useState(false);
   const [startTime, setStartTime] = useState(block.startTime);
@@ -36,6 +47,10 @@ export default function EventEditorModal({
 
   const toggleWeekday = (day: number) => {
     setRepeatDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()));
+  };
+
+  const toggleLinkedTask = (taskId: string) => {
+    setSelectedTaskIds((prev) => (prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId]));
   };
 
   const handleAddTag = () => {
@@ -54,13 +69,13 @@ export default function EventEditorModal({
       setError("Give the event a title.");
       return;
     }
-    if (repeatFreq === "weekly" && repeatDays.length === 0) {
-      setError("Pick at least one day for the weekly repeat.");
+    if (repeatFreq === "custom" && repeatDays.length === 0) {
+      setError("Pick at least one day for the custom repeat.");
       return;
     }
 
     const repeat: RepeatRule | undefined =
-      repeatFreq === "none" ? undefined : { freq: repeatFreq, daysOfWeek: repeatFreq === "weekly" ? repeatDays : undefined };
+      repeatFreq === "none" ? undefined : { freq: repeatFreq, daysOfWeek: repeatFreq === "custom" ? repeatDays : undefined };
 
     onSave(block.id, {
       title: trimmed,
@@ -70,6 +85,7 @@ export default function EventEditorModal({
       startTime,
       endTime: minutesToTime(timeToMinutes(startTime) + duration),
     });
+    onLinkTasks(block.id, selectedTaskIds);
   };
 
   return (
@@ -138,6 +154,27 @@ export default function EventEditorModal({
           )}
         </div>
 
+        {linkableTasks.length > 0 && (
+          <div className={styles.formField}>
+            <label>Link tasks</label>
+            <div className={styles.tagRow}>
+              {linkableTasks.map((task) => {
+                const active = selectedTaskIds.includes(task.id);
+                return (
+                  <button
+                    key={task.id}
+                    type="button"
+                    className={`${styles.tagOption} ${active ? styles.taskOptionActive : ""}`}
+                    onClick={() => toggleLinkedTask(task.id)}
+                  >
+                    {task.title}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className={styles.formField}>
           <label>Repeat</label>
           <select
@@ -147,9 +184,9 @@ export default function EventEditorModal({
           >
             <option value="none">Doesn&apos;t repeat</option>
             <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
+            <option value="custom">Custom</option>
           </select>
-          {repeatFreq === "weekly" && (
+          {repeatFreq === "custom" && (
             <div className={styles.weekdayRow}>
               {WEEKDAY_LABELS.map((label, day) => (
                 <button

@@ -136,9 +136,24 @@
   line-height: 1.2;
 }
 
+.repeatIcon {
+  display: inline-block;
+  vertical-align: -1px;
+  margin-right: 0.2rem;
+  color: #8a8a86;
+}
+
 .blockTime {
   font-size: 0.68rem;
   color: #555;
+}
+
+.blockTimeInline {
+  margin-left: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #666;
+  white-space: nowrap;
 }
 
 .blockHeaderActions {

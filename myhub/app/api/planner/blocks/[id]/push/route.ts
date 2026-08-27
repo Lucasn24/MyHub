@@ -16,8 +16,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Google is not connected" }, { status: 409 });
   }
 
+  let googleEventId: string;
   try {
-    await createEvent({
+    googleEventId = await createEvent({
       summary: title,
       start: new Date(`${date}T${startTime}:00`).toISOString(),
       end: new Date(`${date}T${endTime}:00`).toISOString(),
@@ -27,6 +28,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: message }, { status: 502 });
   }
 
-  const updated = await updatePlannerBlock(id, { pushed_to_google: true });
+  const updated = await updatePlannerBlock(id, { pushed_to_google: true, google_event_id: googleEventId });
   return NextResponse.json(updated);
 }

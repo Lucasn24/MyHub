@@ -1,5 +1,13 @@
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
 .titleInput {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   box-sizing: border-box;
   border: none;
   border-radius: 0.5rem;
@@ -20,6 +28,61 @@
 .titleInput:focus {
   outline: 2px solid #111;
   outline-offset: 1px;
+}
+
+.menuWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  margin: -0.2rem -0.2rem 0 0;
+  border: none;
+  border-radius: 9999px;
+  background-color: transparent;
+  color: #8a8a86;
+  cursor: pointer;
+}
+
+.menuButton:hover {
+  background-color: #f0f0ee;
+  color: #111;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  right: 0;
+  z-index: 10;
+  min-width: 8rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 0.3rem;
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #111;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menuItem:hover {
+  background-color: #f0f0ee;
 }
 
 .empty {

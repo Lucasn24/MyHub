@@ -167,12 +167,18 @@ create table if not exists planner_blocks (
     start_time text not null,
     end_time text not null,
     tag_id uuid references planner_tags(id) on delete set null,
-    -- {freq: "daily"|"weekly", daysOfWeek: number[]|null, endDate: string|null},
+    -- {freq: "daily"|"custom", daysOfWeek: number[]|null, endDate: string|null},
     -- kept as-is from the frontend's RepeatRule type -- no SQL ever reaches inside it.
     repeat jsonb,
     pushed_to_google boolean not null default false,
+    -- The Google Calendar event id returned when this block was pushed --
+    -- lets the timetable recognize its own pushed event in the synced-back
+    -- Google Calendar feed and skip rendering it a second time.
+    google_event_id text,
     created_at timestamptz not null default now()
 );
+
+alter table if exists planner_blocks add column if not exists google_event_id text;
 
 create index if not exists planner_blocks_date_idx on planner_blocks (date);
 

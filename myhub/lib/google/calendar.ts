@@ -1,6 +1,12 @@
 import { google } from "googleapis";
 import { getAuthorizedClient } from "./oauthClient";
 
+// Defaults to the account's main calendar; set GOOGLE_CALENDAR_ID (see
+// .env_sample) to sync a different one instead.
+function getCalendarId(): string {
+  return process.env.GOOGLE_CALENDAR_ID?.trim() || "primary";
+}
+
 export type EventSummary = {
   id: string;
   summary: string;
@@ -27,7 +33,7 @@ export async function listEventsForDate(dateISO: string): Promise<DayCalendarEve
   const dayEnd = new Date(`${dateISO}T23:59:59`);
 
   const { data } = await calendar.events.list({
-    calendarId: "primary",
+    calendarId: getCalendarId(),
     timeMin: dayStart.toISOString(),
     timeMax: dayEnd.toISOString(),
     singleEvents: true,
@@ -54,7 +60,7 @@ export async function listUpcomingEvents(maxResults = 5): Promise<EventSummary[]
   const calendar = google.calendar({ version: "v3", auth: client });
 
   const { data } = await calendar.events.list({
-    calendarId: "primary",
+    calendarId: getCalendarId(),
     timeMin: new Date().toISOString(),
     maxResults,
     singleEvents: true,
@@ -78,18 +84,29 @@ export async function createEvent({
   summary: string;
   start: string;
   end: string;
-}) {
+}): Promise<string> {
   const client = getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const calendar = google.calendar({ version: "v3", auth: client });
 
-  await calendar.events.insert({
-    calendarId: "primary",
+  const { data } = await calendar.events.insert({
+    calendarId: getCalendarId(),
     requestBody: {
       summary,
       start: { dateTime: start },
       end: { dateTime: end },
     },
   });
+
+  return data.id!;
+}
+
+export async function deleteEvent(eventId: string): Promise<void> {
+  const client = getAuthorizedClient();
+  if (!client) throw new Error("Google is not connected");
+
+  const calendar = google.calendar({ version: "v3", auth: client });
+
+  await calendar.events.delete({ calendarId: getCalendarId(), eventId });
 }

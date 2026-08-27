@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { Calendar, CalendarCheck, Pencil } from "lucide-react";
+import { Calendar, CalendarCheck, Pencil, Repeat } from "lucide-react";
 import type { CalendarEvent, ScheduleBlock, Tag } from "./types";
 import { getTagColor } from "./constants";
 import {
@@ -57,6 +57,8 @@ export default function TimetableGrid({
   blocks,
   tags,
   calendarEvents,
+  isToday,
+  selectedDate,
   onCreateRange,
   onMoveBlock,
   onResizeBlock,
@@ -67,6 +69,8 @@ export default function TimetableGrid({
   blocks: ScheduleBlock[];
   tags: Tag[];
   calendarEvents: CalendarEvent[];
+  isToday: boolean;
+  selectedDate: string;
   onCreateRange: (range: { startTime: string; endTime: string }) => void;
   onMoveBlock: (blockId: string, startTime: string) => void;
   onResizeBlock: (blockId: string, endTime: string) => void;
@@ -79,18 +83,23 @@ export default function TimetableGrid({
   const [drag, setDrag] = useState<DragState | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const nowMinutes = useNowMinutes();
-  const showNowLine = nowMinutes >= GRID_START_HOUR * 60 && nowMinutes <= GRID_END_HOUR * 60;
+  const showNowLine = isToday && nowMinutes >= GRID_START_HOUR * 60 && nowMinutes <= GRID_END_HOUR * 60;
 
-  // Center the current-time line in the viewport once, on first load only —
-  // a ref guard keeps later nowMinutes ticks from fighting the user's scroll.
+  // Center the current-time line in the viewport once per visit to "today" —
+  // a ref guard keeps later nowMinutes ticks from fighting the user's scroll,
+  // but re-arms whenever day navigation leaves and returns to today.
   const hasCenteredRef = useRef(false);
   useEffect(() => {
+    if (!isToday) {
+      hasCenteredRef.current = false;
+      return;
+    }
     if (hasCenteredRef.current) return;
     const container = scrollRef.current;
     if (!container || !showNowLine) return;
     hasCenteredRef.current = true;
     container.scrollTop = Math.max(0, minutesToY(nowMinutes) - container.clientHeight / 2);
-  }, [showNowLine, nowMinutes]);
+  }, [isToday, showNowLine, nowMinutes]);
 
   // Mirrors `drag` into a ref so mouseup handlers can read the latest live
   // value synchronously without calling a parent setState from inside a
@@ -246,28 +255,58 @@ export default function TimetableGrid({
           const top = minutesToY(start);
           const height = Math.max(minutesToY(end) - top, PX_PER_SLOT);
           const color = tagColor(block.tagId);
+          // Too short for the time to fit on its own line under the title —
+          // show it inline instead of letting the two overlap.
+          const timeLabel = `${formatTimeLabel(minutesToTime(start))} – ${formatTimeLabel(minutesToTime(end))}`;
+          const showTimeInline = end - start <= 30;
+          // A recurring block only has one underlying row — this is its literal
+          // date vs. a projected occurrence on a day its repeat rule matches.
+          // Moving/resizing/pushing only make sense from the literal date, since
+          // they'd otherwise silently rewrite (or push the wrong day's copy of)
+          // every occurrence at once; editing and deleting still apply anywhere,
+          // since those already act on the whole series regardless.
+          const isHomeDate = block.date === selectedDate;
 
           return (
             <div
               key={block.id}
               className={styles.block}
-              style={{ top, height, backgroundColor: `${color}22`, borderColor: color }}
-              onMouseDown={(e) => startMove(block, e)}
+              style={{
+                top,
+                height,
+                backgroundColor: `${color}22`,
+                borderColor: color,
+                cursor: isHomeDate ? undefined : "default",
+              }}
+              onMouseDown={isHomeDate ? (e) => startMove(block, e) : undefined}
             >
               <div className={styles.blockHeader}>
-                <span className={styles.blockTitle}>{block.title}</span>
+                <span className={styles.blockTitle}>
+                  {block.repeat && (
+                    <Repeat
+                      size={11}
+                      strokeWidth={2.5}
+                      className={styles.repeatIcon}
+                      aria-label="Repeats"
+                    />
+                  )}
+                  {block.title}
+                  {showTimeInline && <span className={styles.blockTimeInline}>{timeLabel}</span>}
+                </span>
                 <div className={styles.blockHeaderActions}>
-                  <button
-                    type="button"
-                    className={styles.blockIconButton}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={() => onPushToGoogle(block.id)}
-                    disabled={block.pushedToGoogle}
-                    aria-label={block.pushedToGoogle ? "On Google Calendar" : "Push to Google Calendar"}
-                    title={block.pushedToGoogle ? "On Google Calendar" : "Push to Google Calendar"}
-                  >
-                    {block.pushedToGoogle ? <CalendarCheck size={13} strokeWidth={2.25} /> : <Calendar size={13} strokeWidth={2.25} />}
-                  </button>
+                  {isHomeDate && (
+                    <button
+                      type="button"
+                      className={styles.blockIconButton}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={() => onPushToGoogle(block.id)}
+                      disabled={block.pushedToGoogle}
+                      aria-label={block.pushedToGoogle ? "On Google Calendar" : "Push to Google Calendar"}
+                      title={block.pushedToGoogle ? "On Google Calendar" : "Push to Google Calendar"}
+                    >
+                      {block.pushedToGoogle ? <CalendarCheck size={13} strokeWidth={2.25} /> : <Calendar size={13} strokeWidth={2.25} />}
+                    </button>
+                  )}
                   <button
                     type="button"
                     className={styles.blockIconButton}
@@ -284,15 +323,14 @@ export default function TimetableGrid({
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={() => onDeleteBlock(block.id)}
                     aria-label={`Remove "${block.title}" from timetable`}
+                    title={block.repeat ? "Removes every occurrence" : undefined}
                   >
                     ×
                   </button>
                 </div>
               </div>
-              <span className={styles.blockTime}>
-                {formatTimeLabel(minutesToTime(start))} – {formatTimeLabel(minutesToTime(end))}
-              </span>
-              <div className={styles.resizeHandle} onMouseDown={(e) => startResize(block, e)} />
+              {!showTimeInline && <span className={styles.blockTime}>{timeLabel}</span>}
+              {isHomeDate && <div className={styles.resizeHandle} onMouseDown={(e) => startResize(block, e)} />}
             </div>
           );
         })}

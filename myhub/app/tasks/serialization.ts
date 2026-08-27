@@ -51,6 +51,7 @@ export function rowToBlock(row: PlannerBlockRow): ScheduleBlock {
     tagId: row.tag_id ?? undefined,
     repeat: row.repeat ?? undefined,
     pushedToGoogle: row.pushed_to_google,
+    googleEventId: row.google_event_id ?? undefined,
   };
 }
 
@@ -65,6 +66,7 @@ export function blockToRow(block: ScheduleBlock): Omit<PlannerBlockRow, "created
     tag_id: block.tagId ?? null,
     repeat: block.repeat ?? null,
     pushed_to_google: block.pushedToGoogle,
+    google_event_id: block.googleEventId ?? null,
   };
 }
 
@@ -80,6 +82,7 @@ export function blockUpdatesToRow(
   if ("tagId" in updates) row.tag_id = updates.tagId ?? null;
   if ("repeat" in updates) row.repeat = updates.repeat ?? null;
   if ("pushedToGoogle" in updates) row.pushed_to_google = updates.pushedToGoogle;
+  if ("googleEventId" in updates) row.google_event_id = updates.googleEventId ?? null;
   return row;
 }
 

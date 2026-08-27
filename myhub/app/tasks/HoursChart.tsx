@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BarChart3, PieChart } from "lucide-react";
 import type { ScheduleBlock, Tag } from "./types";
 import { TAG_OTHER_COLOR, getTagColor } from "./constants";
 import { getWeekRange, isDateInRange, timeToMinutes } from "./time";
@@ -96,32 +97,56 @@ export default function HoursChart({
   todayISO: string;
 }) {
   const [scope, setScope] = useState<"day" | "week">("day");
+  const [chartType, setChartType] = useState<"bar" | "pie">("bar");
   const entries = computeTagHours(scope, todayISO, tags, blocks);
   const total = entries.reduce((sum, e) => sum + e.hours, 0);
   const maxHours = Math.max(...entries.map((e) => e.hours), 0.001);
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.scopeRow}>
-        <button
-          type="button"
-          className={`${styles.scopeButton} ${scope === "day" ? styles.scopeButtonActive : ""}`}
-          onClick={() => setScope("day")}
-        >
-          Day
-        </button>
-        <button
-          type="button"
-          className={`${styles.scopeButton} ${scope === "week" ? styles.scopeButtonActive : ""}`}
-          onClick={() => setScope("week")}
-        >
-          Week
-        </button>
+      <div className={styles.controlsRow}>
+        <div className={styles.scopeRow}>
+          <button
+            type="button"
+            className={`${styles.scopeButton} ${scope === "day" ? styles.scopeButtonActive : ""}`}
+            onClick={() => setScope("day")}
+          >
+            Day
+          </button>
+          <button
+            type="button"
+            className={`${styles.scopeButton} ${scope === "week" ? styles.scopeButtonActive : ""}`}
+            onClick={() => setScope("week")}
+          >
+            Week
+          </button>
+        </div>
+
+        <div className={styles.chartTypeRow}>
+          <button
+            type="button"
+            className={`${styles.chartTypeButton} ${chartType === "bar" ? styles.chartTypeButtonActive : ""}`}
+            onClick={() => setChartType("bar")}
+            aria-label="Bar chart"
+            title="Bar chart"
+          >
+            <BarChart3 size={14} strokeWidth={2.25} />
+          </button>
+          <button
+            type="button"
+            className={`${styles.chartTypeButton} ${chartType === "pie" ? styles.chartTypeButtonActive : ""}`}
+            onClick={() => setChartType("pie")}
+            aria-label="Pie chart"
+            title="Pie chart"
+          >
+            <PieChart size={14} strokeWidth={2.25} />
+          </button>
+        </div>
       </div>
 
       {entries.length === 0 ? (
         <p className={styles.empty}>No scheduled hours logged toward a tag yet.</p>
-      ) : (
+      ) : chartType === "bar" ? (
         <div className={styles.body}>
           <div className={styles.barList}>
             {entries.map((e) => (
@@ -139,7 +164,9 @@ export default function HoursChart({
               </div>
             ))}
           </div>
-
+        </div>
+      ) : (
+        <div className={styles.body}>
           <div className={styles.pieRow}>
             <Donut entries={entries} total={total} />
             <ul className={styles.legend}>

@@ -48,6 +48,7 @@ class BlockCreateRequest(BaseModel):
     tag_id: str | None = None
     repeat: dict | None = None
     pushed_to_google: bool = False
+    google_event_id: str | None = None
 
 
 class BlockUpdateRequest(BaseModel):
@@ -59,6 +60,7 @@ class BlockUpdateRequest(BaseModel):
     tag_id: str | None = None
     repeat: dict | None = None
     pushed_to_google: bool | None = None
+    google_event_id: str | None = None
 
 
 class TagCreateRequest(BaseModel):

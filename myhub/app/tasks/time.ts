@@ -1,5 +1,5 @@
-export const GRID_START_HOUR = 6;
-export const GRID_END_HOUR = 23;
+export const GRID_START_HOUR = 0;
+export const GRID_END_HOUR = 24;
 export const SLOT_MINUTES = 15;
 export const PX_PER_SLOT = 16;
 
@@ -31,6 +31,25 @@ export function toISODate(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+export function addDays(dateISO: string, days: number): string {
+  const d = new Date(`${dateISO}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return toISODate(d);
+}
+
+export function formatDayLabel(dateISO: string, todayISO: string): string {
+  if (dateISO === todayISO) return "Today";
+  if (dateISO === addDays(todayISO, -1)) return "Yesterday";
+  if (dateISO === addDays(todayISO, 1)) return "Tomorrow";
+  // Fixed locale (not the ambient one) -- the server and browser can otherwise
+  // disagree on locale-dependent formatting, which breaks hydration.
+  return new Date(`${dateISO}T00:00:00`).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 // Monday-Sunday week containing the given date.

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import styles from "./page.module.css";
 import TimetableGrid from "./TimetableGrid";
 import TodoList from "./TodoList";
@@ -11,8 +11,9 @@ import TagDetailModal from "./TagDetailModal";
 import HoursChart from "./HoursChart";
 import TaskCreatorModal from "./TaskCreatorModal";
 import EventEditorModal from "./EventEditorModal";
+import { blockOccursOn } from "./occurrences";
 import { blockToRow, blockUpdatesToRow, tagToRow, taskToRow, taskUpdatesToRow } from "./serialization";
-import { minutesToTime, timeToMinutes, toISODate } from "./time";
+import { addDays, formatDayLabel, minutesToTime, timeToMinutes, toISODate } from "./time";
 import type { CalendarEvent, ScheduleBlock, Tag, Task } from "./types";
 
 function apiJSON(url: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) {
@@ -41,38 +42,93 @@ export default function TasksBoard({
   initialBlocks,
   initialTags,
   calendarEvents,
+  selectedDate,
 }: {
   initialTasks: Task[];
   initialBlocks: ScheduleBlock[];
   initialTags: Tag[];
   calendarEvents: CalendarEvent[];
+  selectedDate: string;
 }) {
   const router = useRouter();
   const todayISO = useMemo(() => toISODate(new Date()), []);
+  const isToday = selectedDate === todayISO;
 
   const [tasks, setTasks] = useResyncedState(initialTasks);
   const [blocks, setBlocks] = useResyncedState(initialBlocks);
   const [tags, setTags] = useResyncedState(initialTags);
 
   const [creatorOpen, setCreatorOpen] = useState<null | true | { startTime: string; endTime: string }>(null);
+  const [scheduleTaskId, setScheduleTaskId] = useState<string | null>(null);
   const [openTagId, setOpenTagId] = useState<string | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
 
-  const todaysBlocks = blocks.filter((b) => b.date === todayISO);
+  const visibleBlocks = blocks.filter((b) => blockOccursOn(b, selectedDate));
   const openTag = tags.find((t) => t.id === openTagId) ?? null;
   const editingBlock = blocks.find((b) => b.id === editingBlockId) ?? null;
 
-  const handleCreate = async ({ task, block }: { task?: Task; block?: ScheduleBlock }) => {
+  const goToDate = (dateISO: string) => router.push(`/tasks?date=${dateISO}`);
+  const goToPrevDay = () => goToDate(addDays(selectedDate, -1));
+  const goToNextDay = () => goToDate(addDays(selectedDate, 1));
+  const goToToday = () => goToDate(todayISO);
+
+  const handleCreate = async ({
+    task,
+    block,
+    linkedTaskIds,
+  }: {
+    task?: Task;
+    block?: ScheduleBlock;
+    linkedTaskIds?: string[];
+  }) => {
     if (task) setTasks((prev) => [...prev, task]);
     if (block) setBlocks((prev) => [...prev, block]);
+    if (block && linkedTaskIds?.length) {
+      const linked = new Set(linkedTaskIds);
+      setTasks((prev) => prev.map((t) => (linked.has(t.id) ? { ...t, eventId: block.id } : t)));
+    }
     setCreatorOpen(null);
+    setScheduleTaskId(null);
     try {
       await Promise.all([
         task && apiJSON("/api/planner/tasks", "POST", taskToRow(task)),
         block && apiJSON("/api/planner/blocks", "POST", blockToRow(block)),
+        ...(block
+          ? (linkedTaskIds ?? []).map((taskId) =>
+              apiJSON(`/api/planner/tasks/${taskId}`, "PATCH", taskUpdatesToRow({ eventId: block.id }))
+            )
+          : []),
       ]);
     } catch (err) {
       console.error("Failed to save:", err);
+    }
+    router.refresh();
+  };
+
+  // Links/unlinks tasks to an event from the event's own side — diffs against
+  // whichever tasks currently point at it and only touches the ones that changed.
+  const handleSetLinkedTasks = async (eventId: string, taskIds: string[]) => {
+    const linked = new Set(taskIds);
+    const changed = tasks.filter((t) => (t.eventId === eventId) !== linked.has(t.id));
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (linked.has(t.id)) return { ...t, eventId };
+        if (t.eventId === eventId) return { ...t, eventId: undefined };
+        return t;
+      })
+    );
+    try {
+      await Promise.all(
+        changed.map((t) =>
+          apiJSON(
+            `/api/planner/tasks/${t.id}`,
+            "PATCH",
+            taskUpdatesToRow({ eventId: linked.has(t.id) ? eventId : undefined })
+          )
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update linked tasks:", err);
     }
     router.refresh();
   };
@@ -175,10 +231,11 @@ export default function TasksBoard({
   };
 
   const handleDeleteBlock = async (blockId: string) => {
+    const block = blocks.find((b) => b.id === blockId);
     setBlocks((prev) => prev.filter((b) => b.id !== blockId));
     setTasks((prev) => prev.map((t) => (t.eventId === blockId ? { ...t, eventId: undefined } : t)));
     try {
-      await apiJSON(`/api/planner/blocks/${blockId}`, "DELETE");
+      await apiJSON(`/api/planner/blocks/${blockId}`, "DELETE", { googleEventId: block?.googleEventId });
     } catch (err) {
       console.error("Failed to delete block:", err);
     }
@@ -200,7 +257,12 @@ export default function TasksBoard({
         window.alert(error ?? "Couldn't push this event to Google Calendar.");
         return;
       }
-      setBlocks((prev) => prev.map((b) => (b.id === blockId ? { ...b, pushedToGoogle: true } : b)));
+      const updated = (await res.json()) as { google_event_id: string | null };
+      setBlocks((prev) =>
+        prev.map((b) =>
+          b.id === blockId ? { ...b, pushedToGoogle: true, googleEventId: updated.google_event_id ?? undefined } : b
+        )
+      );
       router.refresh();
     } catch (err) {
       console.error("Failed to push to Google Calendar:", err);
@@ -212,7 +274,7 @@ export default function TasksBoard({
     <div className={styles.dashboard}>
       <div className={styles.topBar}>
         <div>
-          <span className={styles.statusBadge}>TODAY</span>
+          <span className={styles.statusBadge}>{formatDayLabel(selectedDate, todayISO).toUpperCase()}</span>
           <h1 className={styles.heading}>Tasks</h1>
         </div>
         <button type="button" className={styles.newTaskButton} onClick={() => setCreatorOpen(true)}>
@@ -227,12 +289,32 @@ export default function TasksBoard({
         <div className={styles.timetableColumn}>
           <div className={styles.sectionHeader}>
             <span className={styles.sectionTitle}>TIMETABLE</span>
-            <span className={styles.runningCount}>Drag to create a block</span>
+            <div className={styles.dayNav}>
+              {!isToday && (
+                <button type="button" className={styles.dayNavToday} onClick={goToToday}>
+                  Today
+                </button>
+              )}
+              <button type="button" className={styles.dayNavArrow} onClick={goToPrevDay} aria-label="Previous day">
+                <ChevronLeft size={15} strokeWidth={2.5} />
+              </button>
+              <input
+                type="date"
+                className={styles.dayNavInput}
+                value={selectedDate}
+                onChange={(e) => e.target.value && goToDate(e.target.value)}
+              />
+              <button type="button" className={styles.dayNavArrow} onClick={goToNextDay} aria-label="Next day">
+                <ChevronRight size={15} strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
           <TimetableGrid
-            blocks={todaysBlocks}
+            blocks={visibleBlocks}
             tags={tags}
             calendarEvents={calendarEvents}
+            isToday={isToday}
+            selectedDate={selectedDate}
             onCreateRange={handleCreateRange}
             onMoveBlock={handleMoveBlock}
             onResizeBlock={handleResizeBlock}
@@ -255,6 +337,7 @@ export default function TasksBoard({
               todayISO={todayISO}
               onToggleComplete={handleToggleComplete}
               onDelete={handleDeleteTask}
+              onSchedule={setScheduleTaskId}
             />
           </div>
 
@@ -262,18 +345,23 @@ export default function TasksBoard({
             <div className={styles.sectionHeader}>
               <span className={styles.sectionTitle}>DISTRIBUTION</span>
             </div>
-            <HoursChart tags={tags} blocks={blocks} todayISO={todayISO} />
+            <HoursChart tags={tags} blocks={blocks} todayISO={selectedDate} />
           </div>
         </div>
       </div>
 
-      {creatorOpen !== null && (
+      {(creatorOpen !== null || scheduleTaskId !== null) && (
         <TaskCreatorModal
           tags={tags}
-          todaysEvents={todaysBlocks}
-          todayISO={todayISO}
-          initialRange={creatorOpen === true ? null : creatorOpen}
-          onClose={() => setCreatorOpen(null)}
+          tasks={tasks}
+          selectedDate={selectedDate}
+          initialRange={creatorOpen === true || creatorOpen === null ? null : creatorOpen}
+          presetTaskId={scheduleTaskId ?? undefined}
+          defaultMode={creatorOpen === true ? "task" : "event"}
+          onClose={() => {
+            setCreatorOpen(null);
+            setScheduleTaskId(null);
+          }}
           onCreateTag={handleCreateTag}
           onCreate={handleCreate}
         />
@@ -293,9 +381,11 @@ export default function TasksBoard({
         <EventEditorModal
           block={editingBlock}
           tags={tags}
+          tasks={tasks}
           onClose={() => setEditingBlockId(null)}
           onCreateTag={handleCreateTag}
           onSave={handleUpdateBlock}
+          onLinkTasks={handleSetLinkedTasks}
         />
       )}
     </div>

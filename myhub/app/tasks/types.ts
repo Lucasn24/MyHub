@@ -1,8 +1,8 @@
-export type RepeatFreq = "daily" | "weekly";
+export type RepeatFreq = "daily" | "custom";
 
 export type RepeatRule = {
   freq: RepeatFreq;
-  daysOfWeek?: number[]; // 0 (Sun) - 6 (Sat), weekly only
+  daysOfWeek?: number[]; // 0 (Sun) - 6 (Sat), custom only
   endDate?: string; // ISO date, inclusive; undefined = repeats forever
 };
 
@@ -34,6 +34,7 @@ export type ScheduleBlock = {
   tagId?: string;
   repeat?: RepeatRule;
   pushedToGoogle: boolean;
+  googleEventId?: string; // set once pushed — lets the Calendar sync recognize and skip its own event
 };
 
 export type CalendarEvent = {
