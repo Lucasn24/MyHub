@@ -21,11 +21,16 @@ function computeGoalHours(
   const totalsByGoalId = new Map<string, number>();
 
   for (const block of blocks) {
-    if (!block.taskId || !isDateInRange(block.date, range)) continue;
-    const task = tasks.find((t) => t.id === block.taskId);
-    if (!task?.goalId || !task.completedDates.includes(block.date)) continue;
+    if (!isDateInRange(block.date, range)) continue;
     const hours = (timeToMinutes(block.endTime) - timeToMinutes(block.startTime)) / 60;
-    totalsByGoalId.set(task.goalId, (totalsByGoalId.get(task.goalId) ?? 0) + hours);
+
+    if (block.taskId) {
+      const task = tasks.find((t) => t.id === block.taskId);
+      if (!task?.goalId || !task.completedDates.includes(block.date)) continue;
+      totalsByGoalId.set(task.goalId, (totalsByGoalId.get(task.goalId) ?? 0) + hours);
+    } else if (block.goalId) {
+      totalsByGoalId.set(block.goalId, (totalsByGoalId.get(block.goalId) ?? 0) + hours);
+    }
   }
 
   const entries = goals

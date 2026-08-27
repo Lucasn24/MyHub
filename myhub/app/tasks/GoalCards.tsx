@@ -46,8 +46,8 @@ export default function GoalCards({
             style={{ "--accent": color } as CSSProperties}
             onClick={() => onOpenGoal(goal.id)}
           >
-            <span className={styles.count}>{completedCount(goal.id)}</span>
             <span className={styles.label}>{goal.label}</span>
+            <span className={styles.count}>{completedCount(goal.id)}</span>
           </button>
         );
       })}

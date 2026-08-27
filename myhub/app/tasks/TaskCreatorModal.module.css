@@ -1,3 +1,33 @@
+.modeToggle {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin-bottom: 1.1rem;
+  padding: 0.2rem;
+  border-radius: 9999px;
+  background-color: #f0f0ee;
+}
+
+.modeButton {
+  border: none;
+  border-radius: 9999px;
+  background-color: transparent;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8a8a86;
+  cursor: pointer;
+}
+
+.modeButton:hover {
+  color: #111;
+}
+
+.modeButtonActive {
+  background-color: #ffffff;
+  color: #111;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
 .formField {
   display: flex;
   flex-direction: column;

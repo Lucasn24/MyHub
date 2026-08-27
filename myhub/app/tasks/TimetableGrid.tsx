@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
+import { Calendar, CalendarCheck, Pencil } from "lucide-react";
 import type { MockCalendarEvent, ScheduleBlock, Tag } from "./types";
 import {
   GRID_END_HOUR,
@@ -44,6 +45,7 @@ export default function TimetableGrid({
   onResizeBlock,
   onDeleteBlock,
   onPushToGoogle,
+  onEditBlock,
 }: {
   blocks: ScheduleBlock[];
   tags: Tag[];
@@ -54,6 +56,7 @@ export default function TimetableGrid({
   onResizeBlock: (blockId: string, endTime: string) => void;
   onDeleteBlock: (blockId: string) => void;
   onPushToGoogle: (blockId: string) => void;
+  onEditBlock: (blockId: string) => void;
 }) {
   const gridRef = useRef<HTMLDivElement | null>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
@@ -229,28 +232,44 @@ export default function TimetableGrid({
             >
               <div className={styles.blockHeader}>
                 <span className={styles.blockTitle}>{block.title}</span>
-                <button
-                  type="button"
-                  className={styles.blockDelete}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={() => onDeleteBlock(block.id)}
-                  aria-label={`Remove "${block.title}" from timetable`}
-                >
-                  ×
-                </button>
+                <div className={styles.blockHeaderActions}>
+                  <button
+                    type="button"
+                    className={styles.blockIconButton}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={() => onPushToGoogle(block.id)}
+                    disabled={block.pushedToGoogle}
+                    aria-label={block.pushedToGoogle ? "On Google Calendar" : "Push to Google Calendar"}
+                    title={block.pushedToGoogle ? "On Google Calendar" : "Push to Google Calendar"}
+                  >
+                    {block.pushedToGoogle ? <CalendarCheck size={13} strokeWidth={2.25} /> : <Calendar size={13} strokeWidth={2.25} />}
+                  </button>
+                  {!block.taskId && (
+                    <button
+                      type="button"
+                      className={styles.blockIconButton}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={() => onEditBlock(block.id)}
+                      aria-label={`Edit "${block.title}"`}
+                      title="Edit event"
+                    >
+                      <Pencil size={12} strokeWidth={2.25} />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={styles.blockDelete}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={() => onDeleteBlock(block.id)}
+                    aria-label={`Remove "${block.title}" from timetable`}
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
               <span className={styles.blockTime}>
                 {formatTimeLabel(minutesToTime(start))} – {formatTimeLabel(minutesToTime(end))}
               </span>
-              <button
-                type="button"
-                className={`${styles.pushButton} ${block.pushedToGoogle ? styles.pushButtonDone : ""}`}
-                onMouseDown={(e) => e.stopPropagation()}
-                onClick={() => onPushToGoogle(block.id)}
-                disabled={block.pushedToGoogle}
-              >
-                {block.pushedToGoogle ? "✓ On Google Calendar" : "Push to Google Calendar"}
-              </button>
               <div className={styles.resizeHandle} onMouseDown={(e) => startResize(block, e)} />
             </div>
           );

@@ -9,6 +9,7 @@ import GoalCards from "./GoalCards";
 import GoalDetailModal from "./GoalDetailModal";
 import HoursChart from "./HoursChart";
 import TaskCreatorModal from "./TaskCreatorModal";
+import EventEditorModal from "./EventEditorModal";
 import { useLocalStorageState } from "./useLocalStorageState";
 import { DEFAULT_TAGS } from "./constants";
 import { MOCK_CALENDAR_EVENTS } from "./mockCalendarEvents";
@@ -26,15 +27,22 @@ export default function TasksPage() {
 
   const [creatorOpen, setCreatorOpen] = useState<null | true | { startTime: string; endTime: string }>(null);
   const [openGoalId, setOpenGoalId] = useState<string | null>(null);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
 
   const todaysTasks = tasks.filter((t) => occursOn(t.repeat, todayISO));
   const todaysBlocks = blocks.filter((b) => b.date === todayISO);
   const openGoal = goals.find((g) => g.id === openGoalId) ?? null;
+  const editingBlock = blocks.find((b) => b.id === editingBlockId) ?? null;
 
-  const handleCreateTask = (task: Task, block?: ScheduleBlock) => {
-    setTasks((prev) => [...prev, task]);
+  const handleCreate = ({ task, block }: { task?: Task; block?: ScheduleBlock }) => {
+    if (task) setTasks((prev) => [...prev, task]);
     if (block) setBlocks((prev) => [...prev, block]);
     setCreatorOpen(null);
+  };
+
+  const handleUpdateBlock = (blockId: string, updates: Partial<ScheduleBlock>) => {
+    setBlocks((prev) => prev.map((b) => (b.id === blockId ? { ...b, ...updates } : b)));
+    setEditingBlockId(null);
   };
 
   const handleCreateTag = (tag: Tag) => setTags((prev) => [...prev, tag]);
@@ -146,6 +154,7 @@ export default function TasksPage() {
             onResizeBlock={handleResizeBlock}
             onDeleteBlock={handleDeleteBlock}
             onPushToGoogle={handlePushToGoogle}
+            onEditBlock={setEditingBlockId}
           />
         </div>
 
@@ -168,7 +177,7 @@ export default function TasksPage() {
 
           <div className={styles.sideHalf}>
             <div className={styles.sectionHeader}>
-              <span className={styles.sectionTitle}>HOURS BY GOAL</span>
+              <span className={styles.sectionTitle}>DISTRIBUTION</span>
             </div>
             <HoursChart goals={goals} tasks={tasks} blocks={blocks} todayISO={todayISO} />
           </div>
@@ -184,12 +193,23 @@ export default function TasksPage() {
           onClose={() => setCreatorOpen(null)}
           onCreateTag={handleCreateTag}
           onCreateGoal={handleCreateGoal}
-          onCreate={handleCreateTask}
+          onCreate={handleCreate}
         />
       )}
 
       {openGoal && (
         <GoalDetailModal goal={openGoal} tasks={tasks} blocks={blocks} onClose={() => setOpenGoalId(null)} />
+      )}
+
+      {editingBlock && (
+        <EventEditorModal
+          block={editingBlock}
+          tags={tags}
+          goals={goals}
+          onClose={() => setEditingBlockId(null)}
+          onCreateGoal={handleCreateGoal}
+          onSave={handleUpdateBlock}
+        />
       )}
     </div>
   );

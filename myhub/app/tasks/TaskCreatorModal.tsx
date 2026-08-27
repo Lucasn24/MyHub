@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { Goal, RepeatFreq, ScheduleBlock, Tag, Task } from "./types";
+import type { Goal, RepeatFreq, RepeatRule, ScheduleBlock, Tag, Task } from "./types";
 import { DURATION_OPTIONS_MINUTES, TAG_COLOR_PRESETS, getGoalColor } from "./constants";
 import { WEEKDAY_LABELS } from "./occurrences";
 import { minutesToTime, timeToMinutes } from "./time";
 import modalStyles from "./modal.module.css";
 import styles from "./TaskCreatorModal.module.css";
+
+type CreatorMode = "event" | "task";
 
 export default function TaskCreatorModal({
   tags,
@@ -25,8 +27,10 @@ export default function TaskCreatorModal({
   onClose: () => void;
   onCreateTag: (tag: Tag) => void;
   onCreateGoal: (goal: Goal) => void;
-  onCreate: (task: Task, block?: ScheduleBlock) => void;
+  onCreate: (payload: { task?: Task; block?: ScheduleBlock }) => void;
 }) {
+  const [mode, setMode] = useState<CreatorMode>("event");
+
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [dueDate, setDueDate] = useState(todayISO);
@@ -83,11 +87,32 @@ export default function TaskCreatorModal({
   const handleSubmit = () => {
     const trimmed = title.trim();
     if (!trimmed) {
-      setError("Give the task a title.");
+      setError(mode === "event" ? "Give the event a title." : "Give the task a title.");
       return;
     }
     if (repeatFreq === "weekly" && repeatDays.length === 0) {
       setError("Pick at least one day for the weekly repeat.");
+      return;
+    }
+
+    const repeat: RepeatRule | undefined =
+      repeatFreq === "none" ? undefined : { freq: repeatFreq, daysOfWeek: repeatFreq === "weekly" ? repeatDays : undefined };
+
+    if (mode === "event") {
+      const startMinutes = timeToMinutes(scheduleStart);
+      const block: ScheduleBlock = {
+        id: crypto.randomUUID(),
+        title: trimmed,
+        notes: notes.trim() || undefined,
+        date: todayISO,
+        startTime: scheduleStart,
+        endTime: minutesToTime(startMinutes + scheduleDuration),
+        tagIds: selectedTagIds,
+        goalId: selectedGoalId ?? undefined,
+        repeat,
+        pushedToGoogle: false,
+      };
+      onCreate({ block });
       return;
     }
 
@@ -99,7 +124,7 @@ export default function TaskCreatorModal({
       dueTime: dueDate && dueTime ? dueTime : undefined,
       tagIds: selectedTagIds,
       goalId: selectedGoalId ?? undefined,
-      repeat: repeatFreq === "none" ? undefined : { freq: repeatFreq, daysOfWeek: repeatFreq === "weekly" ? repeatDays : undefined },
+      repeat,
       completedDates: [],
       createdAt: new Date().toISOString(),
     };
@@ -119,14 +144,39 @@ export default function TaskCreatorModal({
       };
     }
 
-    onCreate(task, block);
+    onCreate({ task, block });
   };
 
   return (
     <div className={modalStyles.overlay} onClick={onClose}>
       <div className={modalStyles.card} onClick={(e) => e.stopPropagation()}>
-        <h2 className={modalStyles.title}>New task</h2>
-        <p className={modalStyles.subtitle}>Add a to-do, optionally schedule it on today&apos;s timetable.</p>
+        <h2 className={modalStyles.title}>{mode === "event" ? "New event" : "New task"}</h2>
+        <p className={modalStyles.subtitle}>
+          {mode === "event"
+            ? "Add an event to today's timetable."
+            : "Add a to-do, optionally schedule it on today's timetable."}
+        </p>
+
+        <div className={styles.modeToggle} role="tablist" aria-label="Create event or task">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "event"}
+            className={`${styles.modeButton} ${mode === "event" ? styles.modeButtonActive : ""}`}
+            onClick={() => setMode("event")}
+          >
+            Event
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "task"}
+            className={`${styles.modeButton} ${mode === "task" ? styles.modeButtonActive : ""}`}
+            onClick={() => setMode("task")}
+          >
+            Task
+          </button>
+        </div>
 
         <div className={styles.formField}>
           <label>Title</label>
@@ -149,27 +199,29 @@ export default function TaskCreatorModal({
           />
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formField}>
-            <label>Due date</label>
-            <input
-              type="date"
-              className={styles.formInput}
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
+        {mode === "task" && (
+          <div className={styles.formRow}>
+            <div className={styles.formField}>
+              <label>Due date</label>
+              <input
+                type="date"
+                className={styles.formInput}
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </div>
+            <div className={styles.formField}>
+              <label>Due time</label>
+              <input
+                type="time"
+                className={styles.formInput}
+                value={dueTime}
+                disabled={!dueDate}
+                onChange={(e) => setDueTime(e.target.value)}
+              />
+            </div>
           </div>
-          <div className={styles.formField}>
-            <label>Due time</label>
-            <input
-              type="time"
-              className={styles.formInput}
-              value={dueTime}
-              disabled={!dueDate}
-              onChange={(e) => setDueTime(e.target.value)}
-            />
-          </div>
-        </div>
+        )}
 
         <div className={styles.formField}>
           <label>Tags</label>
@@ -291,17 +343,8 @@ export default function TaskCreatorModal({
           )}
         </div>
 
-        <div className={styles.formField}>
-          <label className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={scheduleEnabled}
-              onChange={(e) => setScheduleEnabled(e.target.checked)}
-            />
-            Add to today&apos;s timetable
-          </label>
-
-          {scheduleEnabled && (
+        {mode === "event" ? (
+          <div className={styles.formField}>
             <div className={styles.formRow}>
               <div className={styles.formField}>
                 <label>Start time</label>
@@ -327,8 +370,47 @@ export default function TaskCreatorModal({
                 </select>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className={styles.formField}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={scheduleEnabled}
+                onChange={(e) => setScheduleEnabled(e.target.checked)}
+              />
+              Add to today&apos;s timetable
+            </label>
+
+            {scheduleEnabled && (
+              <div className={styles.formRow}>
+                <div className={styles.formField}>
+                  <label>Start time</label>
+                  <input
+                    type="time"
+                    className={styles.formInput}
+                    value={scheduleStart}
+                    onChange={(e) => setScheduleStart(e.target.value)}
+                  />
+                </div>
+                <div className={styles.formField}>
+                  <label>Duration</label>
+                  <select
+                    className={styles.formInput}
+                    value={scheduleDuration}
+                    onChange={(e) => setScheduleDuration(Number(e.target.value))}
+                  >
+                    {DURATION_OPTIONS_MINUTES.map((m) => (
+                      <option key={m} value={m}>
+                        {m < 60 ? `${m} min` : `${m / 60} hr${m > 60 ? "s" : ""}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {error && <p className={modalStyles.errorText}>{error}</p>}
 
@@ -337,7 +419,7 @@ export default function TaskCreatorModal({
             Cancel
           </button>
           <button type="button" className={modalStyles.primaryButton} onClick={handleSubmit}>
-            Create task
+            {mode === "event" ? "Create event" : "Create task"}
           </button>
         </div>
       </div>

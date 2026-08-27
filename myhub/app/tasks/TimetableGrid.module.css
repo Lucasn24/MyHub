@@ -110,6 +110,30 @@
   color: #555;
 }
 
+.blockHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.blockIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  padding: 0.1rem;
+  border-radius: 0.35rem;
+}
+
+.blockIconButton:hover {
+  color: #111;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
 .blockDelete {
   flex-shrink: 0;
   border: none;
@@ -123,30 +147,6 @@
 
 .blockDelete:hover {
   color: #d6453f;
-}
-
-.pushButton {
-  align-self: flex-start;
-  margin-top: 0.15rem;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 9999px;
-  background-color: #ffffff;
-  padding: 0.15rem 0.55rem;
-  font-size: 0.62rem;
-  font-weight: 600;
-  color: #111;
-  cursor: pointer;
-}
-
-.pushButton:hover:not(:disabled) {
-  background-color: #000000;
-  color: #ffffff;
-}
-
-.pushButtonDone {
-  cursor: default;
-  color: #4f8a5b;
-  border-color: #4f8a5b;
 }
 
 .resizeHandle {
