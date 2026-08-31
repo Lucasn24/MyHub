@@ -75,9 +75,9 @@ CORS is open to `http://localhost:3000` (the Next.js dev server) plus any origin
 
 Both `myhub` (this repo's root, the Next.js app) and `myhub/backend` deploy as two services **in the same Railway project**, so they share Railway's private network and the backend never needs a public URL. The repo root has its own `railway.toml` for the frontend service; this directory has the backend's: `railway.toml` (start command + healthcheck), `Procfile` (fallback/portable start command), `.python-version` (pins the runtime).
 
-1. In one Railway project, create two services from this GitHub repo:
-   - **backend**: Root Directory `backend` (Settings → Source).
-   - **frontend**: Root Directory `/` (repo root).
+1. In one Railway project, create two services from this GitHub repo (`Lucasn24/MyHub` — note the repo root is one level above `myhub/`, so both paths below need that prefix):
+   - **backend**: Root Directory `myhub/backend` (Settings → Source).
+   - **frontend**: Root Directory `myhub` (Settings → Source).
 2. Backend env vars: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (optional), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `INTERNAL_API_KEY` (generate with `openssl rand -base64 32`), `FRONTEND_ORIGINS` (the frontend service's public domain, e.g. `https://myhub-production.up.railway.app`).
 3. Frontend env vars: everything in `.env_sample`, plus `INTERNAL_API_KEY` (same value as the backend's) and `PYTHON_API_URL` set to the backend's **private** domain — Railway gives every service one automatically at `<service-name>.railway.internal`, reachable only from other services in the same project, over HTTP on the backend's `$PORT` (e.g. `http://backend.railway.internal:8000`; check Settings → Networking on the backend service for its exact private hostname).
 4. Only the frontend service needs a public domain (Settings → Networking → Generate Domain). Leave the backend without one — that's what makes it unreachable from outside Railway.
