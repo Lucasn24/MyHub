@@ -14,13 +14,13 @@
 }
 
 .filterSelect {
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.3rem 1.75rem 0.3rem 0.75rem;
   font-size: 0.72rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-muted);
   cursor: pointer;
   max-width: 100%;
 }
@@ -36,17 +36,17 @@
 .empty {
   padding: 1rem 0.25rem;
   font-size: 0.85rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .item {
   display: flex;
   align-items: flex-start;
   gap: 0.65rem;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-left: 3px solid #a3a39d;
+  border: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-left: 3px solid var(--neutral-swatch);
   border-radius: 0.85rem;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.65rem 0.75rem;
 }
 
@@ -60,7 +60,7 @@
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
-  accent-color: #111;
+  accent-color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -81,12 +81,12 @@
 .title {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .titleDone {
   text-decoration: line-through;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .metaLine {
@@ -98,7 +98,7 @@
 
 .due {
   font-size: 0.72rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .tagChip {
@@ -107,7 +107,7 @@
   gap: 0.3rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-muted);
 }
 
 .tagDot {
@@ -125,25 +125,25 @@
 }
 
 .scheduleButton {
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.3rem 0.7rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .scheduleButton:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 .deleteButton {
   border: none;
   background: transparent;
-  color: #8a8a86;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
@@ -151,13 +151,13 @@
 }
 
 .deleteButton:hover {
-  color: #d6453f;
+  color: var(--danger-strong);
 }
 
 .completedSection {
   margin-top: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -169,5 +169,5 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }

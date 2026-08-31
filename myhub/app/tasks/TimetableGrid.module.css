@@ -3,16 +3,16 @@
   flex: 1 1 0;
   min-height: 0;
   overflow-y: auto;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(var(--ink-rgb), 0.08);
   border-radius: 1.25rem;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
 }
 
 .gutter {
   position: relative;
   flex-shrink: 0;
   width: 3.75rem;
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(var(--ink-rgb), 0.06);
 }
 
 .hourLabel {
@@ -23,7 +23,7 @@
   text-align: right;
   font-size: 0.68rem;
   font-weight: 600;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .nowLabel {
@@ -35,7 +35,7 @@
   text-align: right;
   font-size: 0.68rem;
   font-weight: 700;
-  color: #e0392f;
+  color: var(--live);
 }
 
 .gridBody {
@@ -50,7 +50,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.07);
 }
 
 .nowLine {
@@ -58,7 +58,7 @@
   left: 0;
   right: 0;
   z-index: 4;
-  border-top: 1.5px solid #e0392f;
+  border-top: 1.5px solid var(--live);
   pointer-events: none;
 }
 
@@ -69,7 +69,7 @@
   width: 8px;
   height: 8px;
   border-radius: 9999px;
-  background-color: #e0392f;
+  background-color: var(--live);
 }
 
 .calendarEvent {
@@ -77,14 +77,14 @@
   left: 0.5rem;
   right: 0.5rem;
   z-index: 1;
-  border: 1px dashed rgba(0, 0, 0, 0.25);
+  border: 1px dashed rgba(var(--ink-rgb), 0.25);
   border-radius: 0.6rem;
   background: repeating-linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.03),
-    rgba(0, 0, 0, 0.03) 6px,
-    rgba(0, 0, 0, 0.06) 6px,
-    rgba(0, 0, 0, 0.06) 12px
+    rgba(var(--ink-rgb), 0.03),
+    rgba(var(--ink-rgb), 0.03) 6px,
+    rgba(var(--ink-rgb), 0.06) 6px,
+    rgba(var(--ink-rgb), 0.06) 12px
   );
   padding: 0.25rem 0.5rem;
   overflow: hidden;
@@ -99,8 +99,15 @@
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
+
+/*
+ * .block and its children render on top of a per-tag pastel background
+ * (inline style, from the fixed light-mode tag palette in constants.ts),
+ * which stays the same color in both themes — so their text/icon colors
+ * below are intentionally fixed literals, not theme tokens.
+ */
 
 .block {
   position: absolute;
@@ -192,7 +199,7 @@
 }
 
 .blockDelete:hover {
-  color: #d6453f;
+  color: var(--danger-strong);
 }
 
 .resizeHandle {
@@ -209,8 +216,8 @@
   left: 0.5rem;
   right: 0.5rem;
   z-index: 3;
-  border: 1.5px dashed #111;
+  border: 1.5px dashed var(--text-primary);
   border-radius: 0.6rem;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(var(--ink-rgb), 0.08);
   pointer-events: none;
 }

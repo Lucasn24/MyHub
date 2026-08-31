@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGrid, Mail, DollarSign, ListTodo, Settings } from "lucide-react";
 import styles from "./sidebar.module.css";
+import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
   { href: "/", label: "Overview", icon: LayoutGrid },
@@ -39,6 +40,8 @@ export default function Sidebar() {
           })}
         </nav>
       </div>
+
+      <ThemeToggle />
     </aside>
   );
 }

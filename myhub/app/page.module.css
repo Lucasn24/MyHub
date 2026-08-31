@@ -4,7 +4,7 @@
   gap: 2rem;
   height: 100%;
   border-radius: 1.75rem;
-  background-color: #f7f7f7;
+  background-color: var(--bg-page);
   padding: 2rem 2.25rem;
 }
 
@@ -18,13 +18,13 @@
 
 .statusBadge {
   display: inline-block;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
   padding: 0.35rem 0.85rem;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: #333;
+  color: var(--text-muted);
 }
 
 .heading {
@@ -33,23 +33,23 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.05;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .syncButton {
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.65rem 1.25rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .syncButton:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 /* section header, shared by both columns */
@@ -65,28 +65,28 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .runningCount {
   font-size: 0.8rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .viewAllButton {
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.4rem 0.9rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .viewAllButton:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 /* content grid */
@@ -111,7 +111,7 @@
   flex-direction: column;
   gap: 0.6rem;
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   padding: 1.25rem;
 }
 
@@ -119,18 +119,18 @@
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .cardValue {
   font-size: 1.9rem;
   font-weight: 800;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .cardSub {
   font-size: 0.8rem;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
 }
 
 /* monthly expenses */
@@ -147,7 +147,7 @@
   margin: 0 0 1rem;
   padding: 0;
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
 }
 
 .expenseItem {
@@ -155,7 +155,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.06);
 }
 
 .expenseItem:last-child {
@@ -165,19 +165,19 @@
 .expenseName {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .expenseSub {
   margin-top: 0.15rem;
   font-size: 0.75rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .expenseAmount {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .totalBurn {
@@ -185,7 +185,7 @@
   flex-direction: column;
   gap: 0.35rem;
   border-radius: 1.25rem;
-  background-color: #eeea3f;
+  background-color: var(--accent-solid-bg);
   padding: 1.25rem;
 }
 
@@ -193,7 +193,7 @@
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: #6b6a1e;
+  color: var(--accent-solid-fg);
 }
 
 .totalBurnValue {
@@ -204,7 +204,7 @@
 
 .totalBurnSub {
   font-size: 0.8rem;
-  color: #6b6a1e;
+  color: var(--accent-solid-fg);
 }
 
 /* google integration */
@@ -217,7 +217,7 @@
 
 .googlePanel {
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   overflow: hidden;
 }
 
@@ -226,12 +226,12 @@
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .listItem {
   padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.06);
 }
 
 .listItem:last-child {
@@ -241,19 +241,19 @@
 .listEmpty {
   padding: 0.85rem 1.25rem;
   font-size: 0.8rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .listPrimary {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .listSecondary {
   margin-top: 0.15rem;
   font-size: 0.75rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .connectPrompt {
@@ -261,12 +261,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border: 1px dashed rgba(var(--ink-rgb), 0.15);
   border-radius: 1.25rem;
   padding: 1.5rem;
 }
 
 .connectText {
   font-size: 0.85rem;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
 }

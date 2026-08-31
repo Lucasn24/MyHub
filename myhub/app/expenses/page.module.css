@@ -4,7 +4,7 @@
   gap: 1.5rem;
   height: 100%;
   border-radius: 1.75rem;
-  background-color: #f7f7f7;
+  background-color: var(--bg-page);
   padding: 2rem 2.25rem;
 }
 
@@ -18,13 +18,13 @@
 
 .statusBadge {
   display: inline-block;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
   padding: 0.35rem 0.85rem;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: #333;
+  color: var(--text-muted);
 }
 
 .heading {
@@ -33,24 +33,24 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.05;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .syncButton {
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.65rem 1.25rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   cursor: pointer;
   text-decoration: none;
 }
 
 .syncButton:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 .connectPrompt {
@@ -58,14 +58,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border: 1px dashed rgba(var(--ink-rgb), 0.15);
   border-radius: 1.25rem;
   padding: 1.25rem 1.5rem;
 }
 
 .connectText {
   font-size: 0.82rem;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
 }
 
 .backLink {
@@ -74,12 +74,12 @@
   gap: 0.35rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #8a8a86;
+  color: var(--text-secondary);
   text-decoration: none;
 }
 
 .backLink:hover {
-  color: #111;
+  color: var(--text-primary);
 }
 
 /* period / chart-mode toggles */
@@ -96,7 +96,7 @@
   display: inline-flex;
   gap: 0.4rem;
   border-radius: 9999px;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   padding: 0.3rem;
 }
 
@@ -110,20 +110,20 @@
   padding: 0.4rem 0.9rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
   text-decoration: none;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .toggleButton:hover {
-  color: #111;
+  color: var(--text-primary);
 }
 
 .toggleButtonActive,
 .toggleButtonActive:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 /* expense-type cards */
@@ -140,7 +140,7 @@
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   padding: 1.1rem;
   text-decoration: none;
   overflow: hidden;
@@ -148,7 +148,7 @@
 }
 
 .typeCard:hover {
-  background-color: #ebeae3;
+  background-color: var(--bg-panel-hover);
   transform: translateY(-1px);
 }
 
@@ -161,12 +161,12 @@
 }
 
 .typeCardEmpty {
-  background-color: #f7f7f7;
-  border: 1px dashed rgba(0, 0, 0, 0.12);
+  background-color: var(--bg-page);
+  border: 1px dashed rgba(var(--ink-rgb), 0.12);
 }
 
 .typeCardEmpty:hover {
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
 }
 
 .typeCardEmpty .typeCardSwatch {
@@ -174,16 +174,17 @@
 }
 
 .typeCardEmpty .cardValue {
-  color: #b3b3ae;
+  color: var(--text-disabled);
 }
 
 /* chart */
 
 .chartCard {
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   padding: 1.1rem 0.5rem 0.5rem;
   margin-bottom: 1.5rem;
+  color: var(--text-secondary);
 }
 
 /* section header, shared by both columns */
@@ -199,13 +200,13 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .runningCount {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #111;
+  color: var(--text-primary);
 }
 
 /* content grid */
@@ -226,7 +227,7 @@
   margin: 0;
   padding: 0;
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   overflow: hidden;
 }
 
@@ -236,7 +237,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.06);
 }
 
 .expenseItem:last-child {
@@ -259,13 +260,13 @@
 .expenseTitle {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .expenseDate {
   flex-shrink: 0;
   font-size: 0.72rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .expenseRowActions {
@@ -279,13 +280,13 @@
 .expenseCost {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .listEmpty {
   padding: 0.85rem 1.25rem;
   font-size: 0.8rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 /* side panel */
@@ -307,7 +308,7 @@
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   padding: 1.25rem;
 }
 
@@ -315,16 +316,16 @@
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .cardValue {
   font-size: 2rem;
   font-weight: 800;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .cardSub {
   font-size: 0.75rem;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
 }

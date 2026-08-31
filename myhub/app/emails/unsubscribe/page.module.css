@@ -3,7 +3,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.06);
 }
 
 .senderRow:last-child {
@@ -18,13 +18,13 @@
 .senderName {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .senderEmail {
   margin-top: 0.15rem;
   font-size: 0.75rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -32,13 +32,13 @@
 
 .countBadge {
   flex-shrink: 0;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(var(--ink-rgb), 0.12);
   border-radius: 9999px;
   padding: 0.2rem 0.6rem;
   font-size: 0.72rem;
   font-weight: 600;
-  color: #6f6f6b;
-  background-color: #ffffff;
+  color: var(--text-tertiary);
+  background-color: var(--bg-surface);
 }
 
 .actionCol {
@@ -53,13 +53,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid #000000;
+  border: 1px solid var(--ink-solid-bg);
   border-radius: 9999px;
-  background-color: #000000;
+  background-color: var(--ink-solid-bg);
   padding: 0.4rem 0.9rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--ink-solid-fg);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -77,45 +77,45 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.4rem 0.9rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
 }
 
 .openLinkButton:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 .doneBadge {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(var(--ink-rgb), 0.1);
   border-radius: 9999px;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   padding: 0.4rem 0.9rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
   white-space: nowrap;
 }
 
 .noMethod {
   font-size: 0.72rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .errorText {
   font-size: 0.68rem;
-  color: #b3261e;
+  color: var(--danger);
   max-width: 220px;
   text-align: right;
 }

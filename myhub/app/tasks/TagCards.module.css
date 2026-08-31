@@ -10,10 +10,10 @@
   align-items: flex-start;
   gap: 0.25rem;
   min-width: 10.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-left: 3px solid var(--accent, #a3a39d);
+  border: 1px solid rgba(var(--ink-rgb), 0.1);
+  border-left: 3px solid var(--accent, var(--neutral-swatch));
   border-radius: 0.9rem;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.7rem 0.85rem;
   cursor: pointer;
   text-align: left;
@@ -21,20 +21,20 @@
 }
 
 .card:hover {
-  background-color: #f7f7f5;
+  background-color: var(--bg-subtle);
 }
 
 .label {
   font-size: 1.05rem;
   font-weight: 800;
-  color: #111;
+  color: var(--text-primary);
   line-height: 1.15;
 }
 
 .count {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #8a8a86;
+  color: var(--text-secondary);
   line-height: 1;
 }
 
@@ -42,19 +42,19 @@
   display: flex;
   align-items: center;
   min-width: 7.5rem;
-  border: 1px dashed rgba(0, 0, 0, 0.25);
+  border: 1px dashed rgba(var(--ink-rgb), 0.25);
   border-radius: 0.9rem;
   background-color: transparent;
   padding: 0.7rem 0.85rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #8a8a86;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
 .addCard:hover {
-  color: #111;
-  border-color: #111;
+  color: var(--text-primary);
+  border-color: var(--text-primary);
 }
 
 .addForm {
@@ -66,16 +66,16 @@
 .addInput {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 0.9rem;
   padding: 0.65rem 0.85rem;
   font-size: 0.82rem;
-  color: #111;
-  background-color: #ffffff;
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
   font-family: inherit;
 }
 
 .addInput:focus {
-  outline: 2px solid #111;
+  outline: 2px solid var(--text-primary);
   outline-offset: 1px;
 }

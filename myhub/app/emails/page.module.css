@@ -4,7 +4,7 @@
   gap: 1.5rem;
   height: 100%;
   border-radius: 1.75rem;
-  background-color: #f7f7f7;
+  background-color: var(--bg-page);
   padding: 2rem 2.25rem;
 }
 
@@ -18,13 +18,13 @@
 
 .statusBadge {
   display: inline-block;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
   padding: 0.35rem 0.85rem;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: #333;
+  color: var(--text-muted);
 }
 
 .heading {
@@ -33,27 +33,27 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.05;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .syncButton {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.65rem 1.25rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   cursor: pointer;
   text-decoration: none;
 }
 
 .syncButton:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 .syncButton:disabled {
@@ -62,8 +62,8 @@
 }
 
 .syncButton:disabled:hover {
-  background-color: #ffffff;
-  color: #111;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 .topBarActions {
@@ -82,13 +82,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid rgba(179, 38, 30, 0.3);
+  border: 1px solid var(--danger-border);
   border-radius: 9999px;
-  background-color: rgba(179, 38, 30, 0.08);
+  background-color: var(--danger-soft-bg);
   padding: 0.5rem 0.9rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #b3261e;
+  color: var(--danger);
   max-width: 32ch;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,26 +120,26 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(var(--ink-rgb), 0.12);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.45rem 0.9rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-muted);
   text-decoration: none;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .filterPill:hover {
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
 }
 
 .filterPillActive,
 .filterPillActive:hover {
-  background-color: #000000;
-  border-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  border-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 .filterCount {
@@ -162,30 +162,30 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .runningCount {
   font-size: 0.8rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .viewAllButton {
   display: inline-block;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.4rem 0.9rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   cursor: pointer;
   text-decoration: none;
 }
 
 .viewAllButton:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 .viewAllButton:disabled {
@@ -194,8 +194,8 @@
 }
 
 .viewAllButton:disabled:hover {
-  background-color: #ffffff;
-  color: #111;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 /* content grid */
@@ -216,7 +216,7 @@
   margin: 0;
   padding: 0;
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   overflow: hidden;
 }
 
@@ -226,13 +226,13 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.06);
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .emailItem:hover {
-  background-color: #ebeae3;
+  background-color: var(--bg-panel-hover);
 }
 
 .emailItem:last-child {
@@ -262,19 +262,19 @@
 .emailSubject {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .emailReceived {
   flex-shrink: 0;
   font-size: 0.72rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .emailSender {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
 }
 
 /* Gmail-style select checkbox, top-left of each row */
@@ -289,7 +289,7 @@
 .selectCol input {
   width: 16px;
   height: 16px;
-  accent-color: #111;
+  accent-color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -302,23 +302,23 @@
 .selectedCount {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .confirmButton {
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.4rem 0.9rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .confirmButton:hover:not(:disabled) {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 .confirmButton:disabled {
@@ -328,7 +328,7 @@
 
 .emailSnippet {
   font-size: 0.8rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -337,7 +337,7 @@
 .emailBody {
   font-size: 0.82rem;
   line-height: 1.55;
-  color: #52524e;
+  color: var(--text-body);
   white-space: pre-line;
   max-width: 60ch;
   overflow-wrap: break-word;
@@ -346,7 +346,7 @@
 
 .attachmentIndicator {
   flex-shrink: 0;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .extrasGroup {
@@ -361,7 +361,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .chipRow {
@@ -377,27 +377,27 @@
   align-items: center;
   gap: 0.35rem;
   max-width: 100%;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(var(--ink-rgb), 0.12);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 0.3rem 0.7rem;
   font-size: 0.72rem;
   font-weight: 500;
 }
 
 .linkChip {
-  color: #111;
+  color: var(--text-primary);
   text-decoration: none;
   cursor: pointer;
 }
 
 .linkChip:hover {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 .attachmentChip {
-  color: #444;
+  color: var(--text-muted);
 }
 
 .chipText {
@@ -409,7 +409,7 @@
 
 .chipMeta {
   flex-shrink: 0;
-  color: #8a8a86;
+  color: var(--text-secondary);
   font-size: 0.68rem;
 }
 
@@ -419,24 +419,24 @@
   padding: 0.3rem 0.5rem;
   font-size: 0.72rem;
   font-weight: 500;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .actionButton {
   align-self: flex-start;
   margin-top: 0.3rem;
-  border: 1px solid rgba(107, 106, 30, 0.3);
+  border: 1px solid var(--accent-soft-border);
   border-radius: 9999px;
-  background-color: rgba(238, 234, 63, 0.18);
+  background-color: var(--accent-soft-bg);
   padding: 0.3rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b6a1e;
+  color: var(--accent-soft-fg);
   cursor: pointer;
 }
 
 .actionButton:hover {
-  background-color: rgba(238, 234, 63, 0.35);
+  background-color: var(--accent-soft-bg-hover);
 }
 
 .confirmedBadge {
@@ -445,19 +445,19 @@
   gap: 0.35rem;
   align-self: flex-start;
   margin-top: 0.3rem;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(var(--ink-rgb), 0.1);
   border-radius: 9999px;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   padding: 0.3rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
 }
 
 .listEmpty {
   padding: 0.85rem 1.25rem;
   font-size: 0.8rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 /* category badge + per-row external actions */
@@ -472,13 +472,13 @@
 
 .categoryBadge {
   flex-shrink: 0;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 9999px;
   padding: 0.3rem 0.7rem;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  color: #444;
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
@@ -488,21 +488,21 @@
   gap: 0.3rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #8a8a86;
+  color: var(--text-secondary);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
 }
 
 .gmailLink:hover {
-  color: #111;
+  color: var(--text-primary);
   text-decoration: underline;
 }
 
 .categoryBadgeFilled {
-  background-color: #000000;
-  border-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink-solid-bg);
+  border-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
 }
 
 /* side panel */
@@ -524,7 +524,7 @@
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
   padding: 1.1rem;
 }
 
@@ -532,18 +532,18 @@
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .cardValue {
   font-size: 1.7rem;
   font-weight: 800;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .cardSub {
   font-size: 0.75rem;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
 }
 
 .actionList {
@@ -553,12 +553,12 @@
   margin: 0 0 1rem;
   padding: 0;
   border-radius: 1.25rem;
-  background-color: #f2f1ec;
+  background-color: var(--bg-panel);
 }
 
 .actionItem {
   padding: 0.9rem 1.1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.06);
 }
 
 .actionItem:last-child {
@@ -568,27 +568,27 @@
 .expenseName {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .expenseSub {
   margin-top: 0.2rem;
   font-size: 0.75rem;
-  color: #6b6a1e;
+  color: var(--accent-soft-fg);
 }
 
 .cleanupPrompt {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border: 1px dashed rgba(var(--ink-rgb), 0.15);
   border-radius: 1.25rem;
   padding: 1.25rem;
 }
 
 .connectText {
   font-size: 0.82rem;
-  color: #6f6f6b;
+  color: var(--text-tertiary);
 }
 
 /* action/event edit modal */
@@ -599,7 +599,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--scrim);
   z-index: 50;
   padding: 1.5rem;
 }
@@ -609,7 +609,7 @@
   max-height: 90vh;
   overflow-y: auto;
   border-radius: 1.5rem;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 1.75rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
@@ -618,13 +618,13 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .modalSubtitle {
   margin: 0.35rem 0 1.25rem;
   font-size: 0.8rem;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .formField {
@@ -640,24 +640,24 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #8a8a86;
+  color: var(--text-secondary);
 }
 
 .formInput {
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
   border-radius: 0.75rem;
   padding: 0.55rem 0.75rem;
   font-size: 0.85rem;
-  color: #111;
-  background-color: #ffffff;
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
   font-family: inherit;
 }
 
 .formInput:focus {
-  outline: 2px solid #111;
+  outline: 2px solid var(--text-primary);
   outline-offset: 1px;
 }
 
@@ -675,13 +675,13 @@
 }
 
 .modalOkButton {
-  border: 1px solid #000000;
+  border: 1px solid var(--ink-solid-bg);
   border-radius: 9999px;
-  background-color: #000000;
+  background-color: var(--ink-solid-bg);
   padding: 0.5rem 1.15rem;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--ink-solid-fg);
   cursor: pointer;
 }
 
@@ -697,5 +697,5 @@
 .modalError {
   margin: -0.5rem 0 1rem;
   font-size: 0.8rem;
-  color: #b3261e;
+  color: var(--danger);
 }

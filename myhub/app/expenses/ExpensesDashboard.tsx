@@ -171,11 +171,11 @@ export default function ExpensesDashboard({ expenses }: { expenses: Expense[] })
                       type="category"
                       dataKey="label"
                       width={90}
-                      tick={{ fontSize: 12, fill: "#444" }}
+                      tick={{ fontSize: 12, fill: "currentColor" }}
                       axisLine={false}
                       tickLine={false}
                     />
-                    <Tooltip formatter={(value) => formatCost(Number(value))} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
+                    <Tooltip formatter={(value) => formatCost(Number(value))} cursor={{ fill: "rgba(148, 148, 140, 0.18)" }} />
                     <Bar dataKey="cost" radius={[0, 6, 6, 0]}>
                       {chartData.map((card) => (
                         <Cell key={card.type} fill={card.color} />
