@@ -70,12 +70,12 @@ def _get_expense_extractor():
     return getLLM().with_structured_output(ExpenseExtractionResult)
 
 
-def extract_expense(email: EmailInput) -> ExtractedExpense | None:
+def extract_expense(email: EmailInput) -> list[ExtractedExpense]:
     messages = [
         {"role": "system", "content": EXPENSE_EXTRACTION_SYSTEM_PROMPT},
         {"role": "user", "content": build_expense_extraction_prompt(email)},
     ]
-    return _get_expense_extractor().invoke(messages).expense
+    return _get_expense_extractor().invoke(messages).expenses
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ def list_inbox_emails(limit: int = 100) -> list[dict]:
     result = (
         get_supabase_client()
         .table("emails")
-        .select("*, tasks(*), events(*), expenses(*)")
+        .select("*, tasks(*), events(*)")
         .order("received_at", desc=True)
         .limit(limit)
         .execute()
@@ -43,7 +43,7 @@ def list_expenses(limit: int = 200) -> list[dict]:
     result = (
         get_supabase_client()
         .table("expenses")
-        .select("*, emails(subject, sender)")
+        .select("*")
         .order("date", desc=True)
         .limit(limit)
         .execute()
@@ -83,18 +83,21 @@ def replace_tasks(gmail_message_id: str, tasks: list[ExtractedTask]) -> None:
         ).execute()
 
 
-def replace_expense(gmail_message_id: str, expense: ExtractedExpense | None) -> None:
-    client = get_supabase_client()
-    client.table("expenses").delete().eq("gmail_message_id", gmail_message_id).execute()
-    if expense:
-        client.table("expenses").insert(
-            {
-                "gmail_message_id": gmail_message_id,
-                "title": expense.title,
-                "type": expense.type.value,
-                "cost": expense.cost,
-                "date": expense.date.isoformat(),
-            }
+def save_expenses(expenses: list[ExtractedExpense]) -> None:
+    # Expenses are no longer tied to a gmail_message_id (they must survive
+    # deletion of the source email), so there's nothing to scope a delete to
+    # before inserting -- each extraction just appends its expenses.
+    if expenses:
+        get_supabase_client().table("expenses").insert(
+            [
+                {
+                    "title": expense.title,
+                    "type": expense.type.value,
+                    "cost": expense.cost,
+                    "date": expense.date.isoformat(),
+                }
+                for expense in expenses
+            ]
         ).execute()
 
 

@@ -25,7 +25,7 @@ export type DayCalendarEvent = {
 };
 
 export async function listEventsForDate(dateISO: string): Promise<DayCalendarEvent[]> {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const calendar = google.calendar({ version: "v3", auth: client });
@@ -54,7 +54,7 @@ export async function listEventsForDate(dateISO: string): Promise<DayCalendarEve
 }
 
 export async function listUpcomingEvents(maxResults = 5): Promise<EventSummary[]> {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const calendar = google.calendar({ version: "v3", auth: client });
@@ -85,7 +85,7 @@ export async function createEvent({
   start: string;
   end: string;
 }): Promise<string> {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const calendar = google.calendar({ version: "v3", auth: client });
@@ -103,7 +103,7 @@ export async function createEvent({
 }
 
 export async function deleteEvent(eventId: string): Promise<void> {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const calendar = google.calendar({ version: "v3", auth: client });

@@ -1,9 +1,20 @@
+import "server-only";
+
 const BASE_URL = process.env.PYTHON_API_URL ?? "http://localhost:8000";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const internalApiKey = process.env.INTERNAL_API_KEY;
+  if (!internalApiKey) {
+    throw new Error("Set INTERNAL_API_KEY (see .env_sample) -- must match the backend's INTERNAL_API_KEY");
+  }
+
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Internal-Api-Key": internalApiKey,
+      ...(init?.headers ?? {}),
+    },
     cache: "no-store",
   });
   if (!res.ok) {
@@ -57,16 +68,13 @@ export type ExpenseType =
 
 export type EmbeddedExpense = {
   id: string;
-  gmail_message_id: string;
   title: string;
   type: ExpenseType;
   cost: number;
   date: string;
 };
 
-export type InboxExpense = EmbeddedExpense & {
-  emails: { subject: string; sender: string } | null;
-};
+export type InboxExpense = EmbeddedExpense;
 
 export type InboxEmail = {
   id: string;
@@ -81,7 +89,6 @@ export type InboxEmail = {
   category: string | null;
   tasks: InboxTask[];
   events: InboxEvent[];
-  expenses: EmbeddedExpense[];
 };
 
 export async function getInboxEmails(limit = 100): Promise<InboxEmail[]> {
@@ -140,8 +147,17 @@ export type ProcessEmailPayload = {
   received_at: string | null;
 };
 
-export async function processEmail(payload: ProcessEmailPayload): Promise<void> {
-  await request("/email/process", {
+export type ProcessEmailResult = {
+  id: string | null;
+  category: InboxEmail["category"];
+  // Raw extraction output, not the persisted rows -- no id/gmail_message_id/confirmed here.
+  tasks: Omit<InboxTask, "id" | "gmail_message_id" | "confirmed">[];
+  events: Omit<InboxEvent, "id" | "gmail_message_id" | "confirmed">[];
+  expenses: Omit<EmbeddedExpense, "id">[];
+};
+
+export async function processEmail(payload: ProcessEmailPayload): Promise<ProcessEmailResult> {
+  return request<ProcessEmailResult>("/email/process", {
     method: "POST",
     body: JSON.stringify(payload),
   });

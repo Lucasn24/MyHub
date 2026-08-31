@@ -6,7 +6,7 @@ import { getExpenses } from "@/lib/backend";
 import { hasTokens } from "@/lib/google/tokenStore";
 
 async function getAllExpenses(): Promise<Expense[]> {
-  if (!hasTokens()) return [];
+  if (!(await hasTokens())) return [];
   try {
     const expenses = await getExpenses();
     return expenses.map(mapInboxExpense);
@@ -17,7 +17,7 @@ async function getAllExpenses(): Promise<Expense[]> {
 }
 
 export default async function Expenses() {
-  const connected = hasTokens();
+  const connected = await hasTokens();
   const expenses = await getAllExpenses();
 
   return (

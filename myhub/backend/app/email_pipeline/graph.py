@@ -18,7 +18,7 @@ class EmailPipelineState(TypedDict):
     category: EmailCategory | None
     tasks: list[ExtractedTask]
     events: list[DetectedEvent]
-    expense: ExtractedExpense | None
+    expenses: list[ExtractedExpense]
 
 
 def categorize_node(state: EmailPipelineState) -> dict:
@@ -35,7 +35,7 @@ def event_detection_node(state: EmailPipelineState) -> dict:
 
 
 def expense_extraction_node(state: EmailPipelineState) -> dict:
-    return {"expense": extract_expense(state["email"])}
+    return {"expenses": extract_expense(state["email"])}
 
 
 def route_after_categorize(state: EmailPipelineState) -> str:
@@ -80,7 +80,7 @@ def run_email_pipeline(email: EmailInput) -> EmailPipelineState:
         "category": None,
         "tasks": [],
         "events": [],
-        "expense": None,
+        "expenses": [],
     }
     return get_email_pipeline_graph().invoke(initial_state)
 

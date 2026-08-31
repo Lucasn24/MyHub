@@ -21,8 +21,8 @@ from app.email_pipeline.store import (
     list_inbox_emails,
     list_known_message_ids,
     replace_events,
-    replace_expense,
     replace_tasks,
+    save_expenses,
     set_email_category,
     upsert_email_base,
 )
@@ -50,14 +50,14 @@ class EventDetectionResponse(BaseModel):
 
 class ExpenseExtractionResponse(BaseModel):
     id: str | None = None
-    expense: ExtractedExpense | None
+    expenses: list[ExtractedExpense]
 
 
 class ProcessEmailResponse(CategoryResult):
     id: str | None = None
     tasks: list[ExtractedTask]
     events: list[DetectedEvent]
-    expense: ExtractedExpense | None
+    expenses: list[ExtractedExpense]
 
 
 class ConfirmTaskRequest(BaseModel):
@@ -107,11 +107,11 @@ def extract_events_route(req: EmailRequest):
 @router.post("/extract-expense", response_model=ExpenseExtractionResponse)
 def extract_expense_route(req: EmailRequest):
     email = EmailInput(**req.model_dump(exclude={"id"}))
-    expense = extract_expense(email)
+    expenses = extract_expense(email)
     if req.id:
         upsert_email_base(req.id, email)
-        replace_expense(req.id, expense)
-    return ExpenseExtractionResponse(id=req.id, expense=expense)
+        save_expenses(expenses)
+    return ExpenseExtractionResponse(id=req.id, expenses=expenses)
 
 
 @router.post("/process", response_model=ProcessEmailResponse)
@@ -126,14 +126,14 @@ def process(req: EmailRequest):
             replace_tasks(req.id, result["tasks"])
         if result["events"]:
             replace_events(req.id, result["events"])
-        if result["expense"]:
-            replace_expense(req.id, result["expense"])
+        if result["expenses"]:
+            save_expenses(result["expenses"])
     return ProcessEmailResponse(
         id=req.id,
         category=result["category"],
         tasks=result["tasks"],
         events=result["events"],
-        expense=result["expense"],
+        expenses=result["expenses"],
     )
 
 

@@ -25,7 +25,7 @@ async function loadPlannerState(): Promise<{
 }
 
 async function loadCalendarEvents(dateISO: string): Promise<CalendarEvent[]> {
-  if (!hasTokens()) return [];
+  if (!(await hasTokens())) return [];
   try {
     const events = await listEventsForDate(dateISO);
     const gridStartMin = GRID_START_HOUR * 60;

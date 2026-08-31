@@ -2,24 +2,24 @@ import os
 from functools import lru_cache
 
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_anthropic import ChatAnthropic
 from supabase import Client, create_client
 
 load_dotenv()
 
-DEFAULT_GEMINI_MODEL = "gemini-3.6-flash"
+DEFAULT_ANTHROPIC_MODEL = "claude-haiku-4-5"
 
 
 @lru_cache
-def getLLM() -> ChatGoogleGenerativeAI:
-    api_key = os.getenv("GOOGLE_API_KEY")
+def getLLM() -> ChatAnthropic:
+    api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "Set GOOGLE_API_KEY (see .env_sample) — free key at https://aistudio.google.com/apikey"
+            "Set ANTHROPIC_API_KEY (see .env_sample) — get a key at https://console.anthropic.com/settings/keys"
         )
-    return ChatGoogleGenerativeAI(
-        model=os.getenv("GEMINI_MODEL", DEFAULT_GEMINI_MODEL),
-        google_api_key=api_key,
+    return ChatAnthropic(
+        model=os.getenv("ANTHROPIC_MODEL") or DEFAULT_ANTHROPIC_MODEL,
+        api_key=api_key,
     )
 
 

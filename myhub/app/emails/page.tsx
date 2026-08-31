@@ -2,6 +2,7 @@ import Link from "next/link";
 import styles from "./page.module.css";
 import { CATEGORY_LABEL, formatRelativeReceived, type ActionDetail, type Email, type EmailCategory, type EventDetail } from "./data";
 import EmailPanel from "./EmailPanel";
+import SyncStatus from "./SyncStatus";
 import { getInboxEmails, type InboxEmail } from "@/lib/backend";
 import { hasTokens } from "@/lib/google/tokenStore";
 
@@ -52,7 +53,7 @@ function mapInboxEmail(e: InboxEmail): Email {
 }
 
 async function getEmails(): Promise<Email[]> {
-  if (!hasTokens()) return [];
+  if (!(await hasTokens())) return [];
   try {
     const inbox = await getInboxEmails();
     return inbox.map(mapInboxEmail);
@@ -78,7 +79,7 @@ export default async function Emails({
   const { category } = await searchParams;
   const activeCategory = category && category in CATEGORY_LABEL ? (category as EmailCategory) : null;
 
-  const connected = hasTokens();
+  const connected = await hasTokens();
   const emails = await getEmails();
 
   const filtered = activeCategory ? emails.filter((e) => e.category === activeCategory) : emails;
@@ -110,9 +111,12 @@ export default async function Emails({
           <span className={styles.statusBadge}>INBOX &middot; {emails.length} SYNCED</span>
           <h1 className={styles.heading}>Your inbox, sorted.</h1>
         </div>
-        <Link href="/emails/unsubscribe" className={styles.syncButton}>
-          Unsubscribe assistant
-        </Link>
+        <div className={styles.topBarActions}>
+          {connected && <SyncStatus />}
+          <Link href="/emails/unsubscribe" className={styles.syncButton}>
+            Unsubscribe assistant
+          </Link>
+        </div>
       </div>
 
       {!connected ? (

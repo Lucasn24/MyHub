@@ -108,6 +108,8 @@ class ExtractedExpense(BaseModel):
 
 
 class ExpenseExtractionResult(BaseModel):
-    expense: ExtractedExpense | None = Field(
-        default=None, description="Null if the email isn't actually a receipt with an extractable charge"
+    expenses: list[ExtractedExpense] = Field(
+        default_factory=list,
+        description="One entry per distinct purchase/charge/withdrawal. Empty if the email isn't actually "
+        "a receipt with an extractable charge.",
     )

@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createEvent } from "@/lib/google/calendar";
 import { hasTokens } from "@/lib/google/tokenStore";
 import { updatePlannerBlock } from "@/lib/backend";
+import { requireSession } from "@/lib/auth/dal";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await requireSession())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   const { title, date, startTime, endTime } = (await request.json()) as {
     title: string;
@@ -12,7 +17,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     endTime: string;
   };
 
-  if (!hasTokens()) {
+  if (!(await hasTokens())) {
     return NextResponse.json({ error: "Google is not connected" }, { status: 409 });
   }
 

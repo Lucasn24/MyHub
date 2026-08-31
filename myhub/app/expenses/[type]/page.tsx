@@ -15,16 +15,12 @@ import {
 import { getExpenses, type ExpenseType } from "@/lib/backend";
 import { hasTokens } from "@/lib/google/tokenStore";
 
-function gmailUrl(gmailMessageId: string): string {
-  return `https://mail.google.com/mail/u/0/#all/${gmailMessageId}`;
-}
-
 function isExpenseType(value: string): value is ExpenseType {
   return value in EXPENSE_TYPE_LABEL;
 }
 
 async function getAllExpenses(): Promise<Expense[]> {
-  if (!hasTokens()) return [];
+  if (!(await hasTokens())) return [];
   try {
     const expenses = await getExpenses();
     return expenses.map(mapInboxExpense);
@@ -105,18 +101,9 @@ export default async function ExpenseTypeDetail({
                   <span className={styles.expenseTitle}>{expense.title}</span>
                   <span className={styles.expenseDate}>{formatExpenseDate(expense.date)}</span>
                 </div>
-                {expense.emailSender && <div className={styles.expenseSource}>{expense.emailSender}</div>}
               </div>
               <div className={styles.expenseRowActions}>
                 <span className={styles.expenseCost}>{formatCost(expense.cost)}</span>
-                <a
-                  href={gmailUrl(expense.gmailMessageId)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.gmailLink}
-                >
-                  Receipt
-                </a>
               </div>
             </li>
           ))}

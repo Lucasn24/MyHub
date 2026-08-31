@@ -5,7 +5,7 @@ import { findUnsubscribeCandidates, type SenderCluster } from "@/lib/google/gmai
 import SubscriptionList from "./SubscriptionList";
 
 async function getClusters(): Promise<SenderCluster[] | null> {
-  if (!hasTokens()) return null;
+  if (!(await hasTokens())) return null;
   try {
     return await findUnsubscribeCandidates(50);
   } catch (err) {

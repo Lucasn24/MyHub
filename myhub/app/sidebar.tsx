@@ -16,6 +16,8 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
 
+  if (pathname === "/login") return null;
+
   return (
     <aside className={styles.sidebar}>
       <div>

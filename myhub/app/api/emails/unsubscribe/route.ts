@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendMessage } from "@/lib/google/gmail";
+import { requireSession } from "@/lib/auth/dal";
 
 function parseMailto(mailto: string): { to: string; subject: string; body: string } {
   const withoutScheme = mailto.replace(/^mailto:/i, "");
@@ -13,6 +14,10 @@ function parseMailto(mailto: string): { to: string; subject: string; body: strin
 }
 
 export async function POST(request: NextRequest) {
+  if (!(await requireSession())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { method, url, mailto } = (await request.json()) as {
     method: "one-click" | "mailto";
     url?: string;

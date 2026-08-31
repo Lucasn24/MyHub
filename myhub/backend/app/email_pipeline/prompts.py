@@ -73,14 +73,16 @@ def build_event_detection_prompt(email: EmailInput) -> str:
     )
 
 
-EXPENSE_EXTRACTION_SYSTEM_PROMPT = """You extract the purchase/charge described in a receipt, order confirmation, or invoice email.
+EXPENSE_EXTRACTION_SYSTEM_PROMPT = """You extract every purchase/charge/withdrawal described in a receipt, order confirmation, invoice, or account activity summary email.
 
 Rules:
-- title: a short name for the purchase — the merchant name, or a brief order description if that's clearer (e.g. "Uber ride", "Amazon order #123-4567").
-- type: pick the single best-fitting category: groceries, dining, transport, travel, shopping, subscription, utilities, entertainment, health, housing, or other.
-- cost: the total amount actually charged (not a subtotal, and not a listed original price if a discount was applied), as a plain number.
-- date: the date the purchase/charge occurred, per the receipt itself. If the receipt doesn't state a date but the email's send time is given below, use that as the date.
-- If this email doesn't actually contain a real purchase/charge to extract (e.g. it's a shipping notice with no amount, or a promotional email misfiled as a receipt), return null instead of guessing."""
+- If the email lists multiple distinct transactions (e.g. a "recent purchases and ATM withdrawals" digest, a monthly statement, an order with multiple separately-charged items), extract one entry per transaction rather than a single combined total.
+- title: a short name for the purchase — the merchant name, or a brief order description if that's clearer (e.g. "Uber ride", "Amazon order #123-4567", "ATM withdrawal").
+- type: pick the single best-fitting category per transaction: groceries, dining, transport, travel, shopping, subscription, utilities, entertainment, health, housing, or other.
+- cost: the amount actually charged for that transaction (not a subtotal, and not a listed original price if a discount was applied), as a plain number.
+- date: the date each transaction occurred, per the receipt itself. If a transaction doesn't state its own date but the email's send time is given below, use that as the date.
+- Do not merge separate transactions into one entry, and do not also add a combined "total" entry alongside the individual ones.
+- If this email doesn't actually contain any real purchase/charge to extract (e.g. it's a shipping notice with no amount, or a promotional email misfiled as a receipt), return an empty list instead of guessing."""
 
 
 def build_expense_extraction_prompt(email: EmailInput) -> str:

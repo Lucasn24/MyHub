@@ -75,7 +75,6 @@ create index if not exists events_gmail_message_id_idx on events (gmail_message_
 
 create table if not exists expenses (
     id uuid primary key default gen_random_uuid(),
-    gmail_message_id text not null references emails(gmail_message_id) on delete cascade,
     title text not null,
     type text not null check (type in (
         'groceries', 'dining', 'transport', 'travel', 'shopping',
@@ -86,7 +85,26 @@ create table if not exists expenses (
     created_at timestamptz not null default now()
 );
 
-create index if not exists expenses_gmail_message_id_idx on expenses (gmail_message_id);
+-- Expenses used to be a child of emails (gmail_message_id, on delete cascade),
+-- so deleting an email silently deleted its expense history. Expenses now
+-- outlive the source email; drop the column and its index on existing installs.
+drop index if exists expenses_gmail_message_id_idx;
+alter table expenses drop column if exists gmail_message_id;
+
+-- Google OAuth tokens for Gmail/Calendar API access, used by the Next.js app
+-- (lib/google/tokenStore.ts). Single-row table -- this is a single-user app,
+-- so there's no user_id to key on. Previously stored in a local JSON file,
+-- which doesn't survive an ephemeral/serverless host.
+create table if not exists google_tokens (
+    id boolean primary key default true,
+    access_token text,
+    refresh_token text,
+    scope text,
+    token_type text,
+    expiry_date bigint,
+    updated_at timestamptz not null default now(),
+    constraint google_tokens_singleton check (id)
+);
 
 -- Only the backend (service_role key, bypasses RLS) touches these tables for now.
 -- RLS is enabled with no policies so an anon/authenticated key can't read or write them later by accident.
@@ -94,6 +112,7 @@ alter table emails enable row level security;
 alter table tasks enable row level security;
 alter table events enable row level security;
 alter table expenses enable row level security;
+alter table google_tokens enable row level security;
 
 -- Tasks page (personal planner) tables -- distinct from the email-derived
 -- `tasks`/`events` above, which come from parsing inbox messages, not the

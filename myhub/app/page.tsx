@@ -19,7 +19,7 @@ const expenses = [
 ];
 
 async function getGoogleData() {
-  if (!hasTokens()) return null;
+  if (!(await hasTokens())) return null;
 
   try {
     const [emails, events] = await Promise.all([listRecentMessages(4), listUpcomingEvents(4)]);

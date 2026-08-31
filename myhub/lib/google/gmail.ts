@@ -89,7 +89,7 @@ function parseMessageContent(part: gmail_v1.Schema$MessagePart | undefined): Par
 }
 
 export async function listRecentMessages(maxResults = 5, query?: string): Promise<EmailSummary[]> {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const gmail = google.gmail({ version: "v1", auth: client });
@@ -128,7 +128,7 @@ export async function listUnreadMessages(maxResults = 25): Promise<EmailSummary[
 }
 
 export async function markMessageAsRead(messageId: string): Promise<void> {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const gmail = google.gmail({ version: "v1", auth: client });
@@ -148,7 +148,7 @@ export async function getAttachment(
   messageId: string,
   attachmentId: string
 ): Promise<{ data: string; size: number }> {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const gmail = google.gmail({ version: "v1", auth: client });
@@ -171,7 +171,7 @@ export async function sendMessage({
   subject: string;
   body: string;
 }) {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const gmail = google.gmail({ version: "v1", auth: client });
@@ -217,7 +217,7 @@ function isOneClick(listUnsubscribePost: string | undefined, url: string | null)
 }
 
 export async function findUnsubscribeCandidates(maxResults = 50): Promise<SenderCluster[]> {
-  const client = getAuthorizedClient();
+  const client = await getAuthorizedClient();
   if (!client) throw new Error("Google is not connected");
 
   const gmail = google.gmail({ version: "v1", auth: client });

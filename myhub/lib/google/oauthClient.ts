@@ -15,15 +15,18 @@ export function getOAuthClient() {
   );
 }
 
-export function getAuthorizedClient() {
-  const tokens = loadTokens();
+export async function getAuthorizedClient() {
+  const tokens = await loadTokens();
   if (!tokens) return null;
 
   const client = getOAuthClient();
   client.setCredentials(tokens);
 
   client.on("tokens", (newTokens) => {
-    saveTokens({ ...tokens, ...newTokens });
+    // Fire-and-forget -- this event callback can't be awaited.
+    saveTokens({ ...tokens, ...newTokens }).catch((err) => {
+      console.error("Failed to persist refreshed Google tokens:", err);
+    });
   });
 
   return client;

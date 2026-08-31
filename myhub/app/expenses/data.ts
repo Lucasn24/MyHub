@@ -2,13 +2,10 @@ import type { ExpenseType, InboxExpense } from "@/lib/backend";
 
 export type Expense = {
   id: string;
-  gmailMessageId: string;
   title: string;
   type: ExpenseType;
   cost: number;
   date: string;
-  emailSubject: string | null;
-  emailSender: string | null;
 };
 
 export const EXPENSE_TYPE_LABEL: Record<ExpenseType, string> = {
@@ -87,13 +84,10 @@ export function periodLabel(period: Period, reference: Date): string {
 export function mapInboxExpense(e: InboxExpense): Expense {
   return {
     id: e.id,
-    gmailMessageId: e.gmail_message_id,
     title: e.title,
     type: e.type,
     cost: Number(e.cost),
     date: e.date,
-    emailSubject: e.emails?.subject ?? null,
-    emailSender: e.emails?.sender ?? null,
   };
 }
 

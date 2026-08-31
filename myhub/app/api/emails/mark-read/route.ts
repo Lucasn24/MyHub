@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { markMessageAsRead } from "@/lib/google/gmail";
 import { deleteEmail } from "@/lib/backend";
+import { requireSession } from "@/lib/auth/dal";
 
 export async function POST(request: NextRequest) {
+  if (!(await requireSession())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { gmail_message_ids } = (await request.json()) as { gmail_message_ids: string[] };
 
   const results = await Promise.all(
