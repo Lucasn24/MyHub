@@ -7,19 +7,20 @@ SYSTEM_PROMPT = """You classify emails into exactly one category. Categories:
 - acknowledgment: Confirms something was received (auto-replies, 'we got your message', support ticket confirmations) with no action needed.
 - newsletter: Recurring editorial content the user subscribed to.
 - promotional: Marketing, sales, or advertising content.
-- receipt: Order confirmations, invoices, payment receipts.
+- receipt: Order confirmations, invoices, payment receipts, and bank/card transaction alerts (e.g. "Your card ending 1234 was charged $45.00", purchase notifications, ATM withdrawal alerts, account activity summaries).
 - personal: One-to-one correspondence from a person the user knows.
 - social: Notifications from social networks or community platforms.
 - spam: Unsolicited or malicious content.
 - other: Doesn't clearly fit any other category.
 
 If more than one category could apply, prefer the one listed first here:
-spam, urgent, meeting, action_required, acknowledgment, receipt, newsletter, promotional, social, personal, other
+spam, urgent, meeting, action_required, receipt, acknowledgment, newsletter, promotional, social, personal, other
 
 Examples:
 - A meeting invite that also asks you to confirm attendance or bring something -> meeting, not action_required.
 - A subscribed newsletter that includes a seasonal sale -> newsletter, not promotional, unless the email is sales-only.
-- An auto-reply confirming receipt of your request (even if it says 'we'll follow up') -> acknowledgment, not action_required."""
+- An auto-reply confirming receipt of your request (even if it says 'we'll follow up') -> acknowledgment, not action_required.
+- A bank notification that a charge or withdrawal was processed on your card/account -> receipt, not acknowledgment, even if it's phrased as a confirmation with no action needed."""
 
 
 def build_user_prompt(email: EmailInput) -> str:
