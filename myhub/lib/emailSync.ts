@@ -74,10 +74,9 @@ async function runSyncCycle(): Promise<void> {
   const [known, unread] = await Promise.all([getKnownMessageIds(), listUnreadMessages(25)]);
   const newMessages = unread.filter((message) => !known.has(message.id));
 
-  let processedCount = 0;
-  for (const message of newMessages) {
-    try {
-      const result = await processEmail({
+  const results = await Promise.allSettled(
+    newMessages.map((message) =>
+      processEmail({
         id: message.id,
         subject: message.subject,
         sender: message.from,
@@ -86,22 +85,29 @@ async function runSyncCycle(): Promise<void> {
         links: message.links,
         attachments: message.attachments.map((a) => ({ filename: a.filename, size: a.size })),
         received_at: message.receivedAt,
-      });
-      processedCount += 1;
+      })
+    )
+  );
 
-      // A receipt with expenses successfully pulled out of it needs no further
-      // action from the user -- mark it read so it drops out of the unread/sync
-      // pool. Keep the email row (and its expenses) intact; only tasks/meetings
-      // get dismissed-and-deleted, via the manual mark-read flow.
-      if (result.category === "receipt" && result.expenses.length > 0) {
-        try {
-          await markMessageAsRead(message.id);
-        } catch (err) {
-          console.error(`[email-sync] failed to mark receipt ${message.id} as read:`, err);
-        }
+  let processedCount = 0;
+  for (const [i, result] of results.entries()) {
+    const message = newMessages[i];
+    if (result.status === "rejected") {
+      console.error(`[email-sync] failed to process message ${message.id}:`, result.reason);
+      continue;
+    }
+    processedCount += 1;
+
+    // A receipt with expenses successfully pulled out of it needs no further
+    // action from the user -- mark it read so it drops out of the unread/sync
+    // pool. Keep the email row (and its expenses) intact; only tasks/meetings
+    // get dismissed-and-deleted, via the manual mark-read flow.
+    if (result.value.category === "receipt" && result.value.expenses.length > 0) {
+      try {
+        await markMessageAsRead(message.id);
+      } catch (err) {
+        console.error(`[email-sync] failed to mark receipt ${message.id} as read:`, err);
       }
-    } catch (err) {
-      console.error(`[email-sync] failed to process message ${message.id}:`, err);
     }
   }
 

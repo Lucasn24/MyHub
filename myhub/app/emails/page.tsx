@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import styles from "./page.module.css";
 import { CATEGORY_LABEL, formatRelativeReceived, type ActionDetail, type Email, type EmailCategory, type EventDetail } from "./data";
 import EmailPanel from "./EmailPanel";
@@ -71,15 +72,27 @@ function buildFilters(list: Email[]) {
   return [...counts.entries()].sort((a, b) => b[1] - a[1]);
 }
 
-export default async function Emails({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string }>;
-}) {
-  const { category } = await searchParams;
-  const activeCategory = category && category in CATEGORY_LABEL ? (category as EmailCategory) : null;
+function EmailsSkeleton() {
+  return (
+    <>
+      <div className={styles.filterRow}>
+        <span className={`${styles.filterPill} ${styles.filterPillActive}`}>All</span>
+      </div>
+      <div className={styles.content}>
+        <section>
+          <span className={styles.connectText}>Loading your inbox&hellip;</span>
+        </section>
+        <aside className={styles.sidePanel}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionTitle}>NEEDS ATTENTION</span>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
 
-  const connected = await hasTokens();
+async function EmailsContent({ activeCategory }: { activeCategory: EmailCategory | null }) {
   const emails = await getEmails();
 
   const filtered = activeCategory ? emails.filter((e) => e.category === activeCategory) : emails;
@@ -105,10 +118,96 @@ export default async function Emails({
   ].slice(0, 3);
 
   return (
+    <>
+      <div className={styles.filterRow}>
+        <Link
+          href="/emails"
+          className={`${styles.filterPill} ${!activeCategory ? styles.filterPillActive : ""}`}
+        >
+          All
+          <span className={styles.filterCount}>{emails.length}</span>
+        </Link>
+        {filters.map(([cat, count]) => (
+          <Link
+            key={cat}
+            href={`/emails?category=${cat}`}
+            className={`${styles.filterPill} ${activeCategory === cat ? styles.filterPillActive : ""}`}
+          >
+            {CATEGORY_LABEL[cat]}
+            <span className={styles.filterCount}>{count}</span>
+          </Link>
+        ))}
+      </div>
+
+      <div className={styles.content}>
+        <section>
+          <EmailPanel
+            emails={filtered}
+            categoryLabel={CATEGORY_LABEL}
+            sectionTitle={activeCategory ? CATEGORY_LABEL[activeCategory].toUpperCase() : "ALL MAIL"}
+          />
+        </section>
+
+        <aside className={styles.sidePanel}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionTitle}>NEEDS ATTENTION</span>
+          </div>
+
+          <div className={styles.attentionGrid}>
+            <div className={styles.automationCard}>
+              <span className={styles.cardLabel}>ACTION REQUIRED</span>
+              <span className={styles.cardValue}>{pendingTasks.length}</span>
+              <span className={styles.cardSub}>Open tasks from email</span>
+            </div>
+            <div className={styles.automationCard}>
+              <span className={styles.cardLabel}>MEETINGS</span>
+              <span className={styles.cardValue}>{pendingEvents.length}</span>
+              <span className={styles.cardSub}>Proposed or confirmed</span>
+            </div>
+          </div>
+
+          <ul className={styles.actionList}>
+            {attentionItems.length === 0 ? (
+              <li className={styles.listEmpty}>Nothing needs attention right now.</li>
+            ) : (
+              attentionItems.map((item) => (
+                <li className={styles.actionItem} key={item.key}>
+                  <div className={styles.expenseName}>{item.subject}</div>
+                  <div className={styles.expenseSub}>{item.detail}</div>
+                </li>
+              ))
+            )}
+          </ul>
+
+          <div className={styles.cleanupPrompt}>
+            <span className={styles.connectText}>
+              Clear out newsletters and promotions clogging your inbox.
+            </span>
+            <Link href="/emails/unsubscribe" className={styles.viewAllButton}>
+              Review senders
+            </Link>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
+
+export default async function Emails({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category } = await searchParams;
+  const activeCategory = category && category in CATEGORY_LABEL ? (category as EmailCategory) : null;
+
+  const connected = await hasTokens();
+
+  return (
     <div className={styles.dashboard}>
       <div className={styles.topBar}>
         <div>
-          <span className={styles.statusBadge}>INBOX &middot; {emails.length} SYNCED</span>
+          <span className={styles.statusBadge}>INBOX</span>
           <h1 className={styles.heading}>Your inbox, sorted.</h1>
         </div>
         <div className={styles.topBarActions}>
@@ -129,78 +228,9 @@ export default async function Emails({
           </a>
         </div>
       ) : (
-        <>
-          <div className={styles.filterRow}>
-            <Link
-              href="/emails"
-              className={`${styles.filterPill} ${!activeCategory ? styles.filterPillActive : ""}`}
-            >
-              All
-              <span className={styles.filterCount}>{emails.length}</span>
-            </Link>
-            {filters.map(([cat, count]) => (
-              <Link
-                key={cat}
-                href={`/emails?category=${cat}`}
-                className={`${styles.filterPill} ${activeCategory === cat ? styles.filterPillActive : ""}`}
-              >
-                {CATEGORY_LABEL[cat]}
-                <span className={styles.filterCount}>{count}</span>
-              </Link>
-            ))}
-          </div>
-
-          <div className={styles.content}>
-            <section>
-              <EmailPanel
-                emails={filtered}
-                categoryLabel={CATEGORY_LABEL}
-                sectionTitle={activeCategory ? CATEGORY_LABEL[activeCategory].toUpperCase() : "ALL MAIL"}
-              />
-            </section>
-
-            <aside className={styles.sidePanel}>
-              <div className={styles.sectionHeader}>
-                <span className={styles.sectionTitle}>NEEDS ATTENTION</span>
-              </div>
-
-              <div className={styles.attentionGrid}>
-                <div className={styles.automationCard}>
-                  <span className={styles.cardLabel}>ACTION REQUIRED</span>
-                  <span className={styles.cardValue}>{pendingTasks.length}</span>
-                  <span className={styles.cardSub}>Open tasks from email</span>
-                </div>
-                <div className={styles.automationCard}>
-                  <span className={styles.cardLabel}>MEETINGS</span>
-                  <span className={styles.cardValue}>{pendingEvents.length}</span>
-                  <span className={styles.cardSub}>Proposed or confirmed</span>
-                </div>
-              </div>
-
-              <ul className={styles.actionList}>
-                {attentionItems.length === 0 ? (
-                  <li className={styles.listEmpty}>Nothing needs attention right now.</li>
-                ) : (
-                  attentionItems.map((item) => (
-                    <li className={styles.actionItem} key={item.key}>
-                      <div className={styles.expenseName}>{item.subject}</div>
-                      <div className={styles.expenseSub}>{item.detail}</div>
-                    </li>
-                  ))
-                )}
-              </ul>
-
-              <div className={styles.cleanupPrompt}>
-                <span className={styles.connectText}>
-                  Clear out newsletters and promotions clogging your inbox.
-                </span>
-                <Link href="/emails/unsubscribe" className={styles.viewAllButton}>
-                  Review senders
-                </Link>
-              </div>
-            </aside>
-          </div>
-        </>
+        <Suspense fallback={<EmailsSkeleton />}>
+          <EmailsContent activeCategory={activeCategory} />
+        </Suspense>
       )}
     </div>
   );

@@ -8,7 +8,7 @@ import type { CATEGORY_LABEL, Email, HighlightDetail } from "./data";
 import ActionEventModal from "./ActionEventModal";
 
 const ATTENTION_CATEGORIES = new Set<Email["category"]>(["urgent", "action_required", "meeting"]);
-const MAX_COLLAPSED_LINKS = 4;
+const MAX_COLLAPSED_LINKS = 2;
 
 type ActiveDetail = { emailId: string; label: string; detail: HighlightDetail };
 
