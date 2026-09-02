@@ -72,6 +72,7 @@ export type EmbeddedExpense = {
   type: ExpenseType;
   cost: number;
   date: string;
+  created_at?: string;
 };
 
 export type InboxExpense = EmbeddedExpense;
@@ -99,6 +100,16 @@ export async function getInboxEmails(limit = 100): Promise<InboxEmail[]> {
 export async function getExpenses(limit = 200): Promise<InboxExpense[]> {
   const { expenses } = await request<{ expenses: InboxExpense[] }>(`/email/expenses?limit=${limit}`);
   return expenses;
+}
+
+export async function updateExpense(
+  id: string,
+  updates: { title: string; type: ExpenseType; cost: number }
+): Promise<InboxExpense> {
+  return request<InboxExpense>(`/email/expenses/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
 }
 
 export async function getKnownMessageIds(): Promise<Set<string>> {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BarChart3, PieChart as PieChartIcon } from "lucide-react";
 import {
@@ -16,16 +17,33 @@ import {
   YAxis,
 } from "recharts";
 import styles from "./page.module.css";
+import ExpenseRow from "./ExpenseRow";
 import {
   EXPENSE_TYPE_COLOR,
   EXPENSE_TYPE_LABEL,
   formatCost,
+  formatRelativeTime,
   isInPeriod,
   periodLabel,
   type Expense,
   type Period,
 } from "./data";
 import type { ExpenseType } from "@/lib/backend";
+
+const RECENT_COUNT = 6;
+
+// Mirrors the resynced-state pattern used elsewhere in the app (see
+// app/tasks/TasksBoard.tsx) -- lets edits update the list immediately while
+// still picking up the server's recomputed data after router.refresh().
+function useResyncedState<T>(fromServer: T) {
+  const [state, setState] = useState(fromServer);
+  const [prev, setPrev] = useState(fromServer);
+  if (prev !== fromServer) {
+    setPrev(fromServer);
+    setState(fromServer);
+  }
+  return [state, setState] as const;
+}
 
 type ChartMode = "pie" | "bar";
 
@@ -38,11 +56,22 @@ type TypeTotal = {
 };
 
 export default function ExpensesDashboard({ expenses }: { expenses: Expense[] }) {
+  const router = useRouter();
   const [period, setPeriod] = useState<Period>("month");
   const [chartMode, setChartMode] = useState<ChartMode>("pie");
+  const [items, setItems] = useResyncedState(expenses);
+
+  const handleSaved = (updated: Expense) => {
+    setItems((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+    router.refresh();
+  };
 
   const reference = new Date();
-  const periodExpenses = expenses.filter((e) => isInPeriod(e.date, period, reference));
+  const periodExpenses = items.filter((e) => isInPeriod(e.date, period, reference));
+
+  const recent = [...items]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, RECENT_COUNT);
 
   const totalsByType = new Map<ExpenseType, { cost: number; count: number }>();
   for (const expense of periodExpenses) {
@@ -186,6 +215,27 @@ export default function ExpensesDashboard({ expenses }: { expenses: Expense[] })
               </ResponsiveContainer>
             )}
           </div>
+
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionTitle}>RECENTLY ADDED</span>
+          </div>
+
+          {recent.length === 0 ? (
+            <ul className={styles.recentPanel}>
+              <li className={styles.listEmpty}>Nothing added yet.</li>
+            </ul>
+          ) : (
+            <ul className={styles.recentPanel}>
+              {recent.map((expense) => (
+                <ExpenseRow
+                  key={expense.id}
+                  expense={expense}
+                  subtitle={formatRelativeTime(expense.createdAt)}
+                  onSaved={handleSaved}
+                />
+              ))}
+            </ul>
+          )}
         </aside>
       </div>
     </>

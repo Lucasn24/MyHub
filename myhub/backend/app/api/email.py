@@ -10,6 +10,7 @@ from app.email_pipeline.schemas import (
     CategoryResult,
     DetectedEvent,
     EmailInput,
+    ExpenseType,
     ExtractedExpense,
     ExtractedTask,
 )
@@ -24,6 +25,7 @@ from app.email_pipeline.store import (
     replace_tasks,
     save_expenses,
     set_email_category,
+    update_expense,
     upsert_email_base,
 )
 
@@ -58,6 +60,12 @@ class ProcessEmailResponse(CategoryResult):
     tasks: list[ExtractedTask]
     events: list[DetectedEvent]
     expenses: list[ExtractedExpense]
+
+
+class UpdateExpenseRequest(BaseModel):
+    title: str
+    type: ExpenseType
+    cost: float
 
 
 class ConfirmTaskRequest(BaseModel):
@@ -145,6 +153,15 @@ def inbox(limit: int = 100):
 @router.get("/expenses")
 def expenses(limit: int = 200):
     return {"expenses": list_expenses(limit)}
+
+
+@router.patch("/expenses/{expense_id}")
+def update_expense_route(expense_id: str, req: UpdateExpenseRequest):
+    updated = update_expense(
+        expense_id,
+        {"title": req.title, "type": req.type.value, "cost": req.cost},
+    )
+    return updated
 
 
 @router.get("/known-ids")

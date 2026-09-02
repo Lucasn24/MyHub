@@ -101,6 +101,11 @@ def save_expenses(expenses: list[ExtractedExpense]) -> None:
         ).execute()
 
 
+def update_expense(expense_id: str, updates: dict) -> dict:
+    result = get_supabase_client().table("expenses").update(updates).eq("id", expense_id).execute()
+    return result.data[0]
+
+
 def replace_events(gmail_message_id: str, events: list[DetectedEvent]) -> None:
     client = get_supabase_client()
     client.table("events").delete().eq("gmail_message_id", gmail_message_id).execute()

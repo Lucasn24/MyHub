@@ -2,10 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import styles from "../page.module.css";
+import ExpenseTypeList from "./ExpenseTypeList";
 import {
   EXPENSE_TYPE_LABEL,
   formatCost,
-  formatExpenseDate,
   isInPeriod,
   mapInboxExpense,
   periodLabel,
@@ -88,27 +88,11 @@ export default async function ExpenseTypeDetail({
         <span className={styles.sectionTitle}>{EXPENSE_TYPE_LABEL[type].toUpperCase()} EXPENSES</span>
       </div>
 
-      {filtered.length === 0 ? (
-        <ul className={styles.expenseList}>
-          <li className={styles.listEmpty}>No {EXPENSE_TYPE_LABEL[type].toLowerCase()} expenses for this period.</li>
-        </ul>
-      ) : (
-        <ul className={styles.expenseList}>
-          {filtered.map((expense) => (
-            <li className={styles.expenseItem} key={expense.id}>
-              <div className={styles.expenseMain}>
-                <div className={styles.expenseTopLine}>
-                  <span className={styles.expenseTitle}>{expense.title}</span>
-                  <span className={styles.expenseDate}>{formatExpenseDate(expense.date)}</span>
-                </div>
-              </div>
-              <div className={styles.expenseRowActions}>
-                <span className={styles.expenseCost}>{formatCost(expense.cost)}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ExpenseTypeList
+        expenses={filtered}
+        type={type}
+        emptyLabel={`No ${EXPENSE_TYPE_LABEL[type].toLowerCase()} expenses for this period.`}
+      />
     </div>
   );
 }

@@ -289,6 +289,169 @@
   color: var(--text-secondary);
 }
 
+/* per-row edit menu */
+
+.expenseMenuWrap {
+  position: relative;
+}
+
+.expenseMenuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 9999px;
+  background-color: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.expenseMenuButton:hover {
+  background-color: var(--bg-chip);
+  color: var(--text-primary);
+}
+
+.expenseMenu {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  right: 0;
+  z-index: 10;
+  min-width: 7rem;
+  border: 1px solid rgba(var(--ink-rgb), 0.1);
+  border-radius: 0.75rem;
+  background-color: var(--bg-surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 0.3rem;
+}
+
+.expenseMenuItem {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.expenseMenuItem:hover {
+  background-color: var(--bg-chip);
+}
+
+/* inline edit form */
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.editRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editInput,
+.editSelect,
+.editInputCost {
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
+  border-radius: 0.6rem;
+  background-color: var(--bg-surface);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  color: var(--text-primary);
+}
+
+.editInput {
+  flex: 2;
+  min-width: 0;
+}
+
+.editSelect {
+  flex: 1.4;
+  min-width: 0;
+}
+
+.editInputCost {
+  flex: 0.9;
+  min-width: 0;
+}
+
+.editInput:focus,
+.editSelect:focus,
+.editInputCost:focus {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 1px;
+}
+
+.editError {
+  font-size: 0.75rem;
+  color: var(--danger-strong);
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.editButton,
+.editButtonPrimary {
+  border-radius: 9999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editButton {
+  border: 1px solid rgba(var(--ink-rgb), 0.15);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.editButton:hover {
+  background-color: var(--bg-chip);
+}
+
+.editButtonPrimary {
+  border: 1px solid transparent;
+  background-color: var(--ink-solid-bg);
+  color: var(--ink-solid-fg);
+}
+
+.editButtonPrimary:hover {
+  opacity: 0.9;
+}
+
+.editButtonPrimary:disabled,
+.editButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* recently added panel */
+
+.recentPanel {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 1.25rem;
+  background-color: var(--bg-panel);
+  overflow: hidden;
+}
+
 /* side panel */
 
 .sidePanel {
